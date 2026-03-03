@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/bpmn" exporter="Camunda Modeler" exporterVersion="5.44.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_Reparatur" name="Fahrradreparatur" processRef="Process_Reparatur" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Reparatur" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Hersteller" name="Teilehersteller">
+        <bpmn:flowNodeRef>Task_BestellungAufnehmen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Kommissionieren</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Versenden</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Verpacken</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Radladen" name="Radladenbesitzer">
+        <bpmn:flowNodeRef>Task_Identifizieren</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Angebot</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Warten</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Angenommen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Split_Arbeit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Bestand</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Teile</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Bestellung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Timeout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Join_Arbeit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Montage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Rechnung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Abholbescheid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Join_Ablehnung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Abgelehnt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_TeileErhalten</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Kunde" name="Kunde">
+        <bpmn:flowNodeRef>Task_Demontage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Ueberweisen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_Geldeingang</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Abholen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:userTask id="Task_Identifizieren" name="Defekte identifizieren">
+      <bpmn:incoming>Flow_1nfjbd1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Angebot" name="Angebot machen">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:eventBasedGateway id="Gateway_Warten" name="Warten auf Bedenkzeit">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToAngenommen</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ToAbgelehnt</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ToTimeout</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Event_Angenommen" name="Angebot angenommen">
+      <bpmn:incoming>Flow_ToAngenommen</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:parallelGateway id="Gateway_Split_Arbeit">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:userTask id="Task_Bestand" name="Bestand pruefen">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_Teile" name="Zu wenig Teile?">
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_Teile_Ja</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Teile_Nein</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Bestellung" name="Teile bestellen">
+      <bpmn:incoming>Flow_Teile_Ja</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_BestellungAufnehmen" name="Bestellung aufnehmen">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:manualTask id="Task_Kommissionieren" name="Kommissionieren">
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pdm2wi</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="Task_Versenden" name="Versenden">
+      <bpmn:incoming>Flow_0u5cb28</bpmn:incoming>
+      <bpmn:outgoing>Flow_1d0y5w5</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:manualTask id="Task_Verpacken" name="Verpacken">
+      <bpmn:incoming>Flow_0pdm2wi</bpmn:incoming>
+      <bpmn:outgoing>Flow_0u5cb28</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:intermediateCatchEvent id="Event_Timeout" name="3 Tage vergangen">
+      <bpmn:incoming>Flow_ToTimeout</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToJoinAblehnung2</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P3D</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:manualTask id="Task_Demontage" name="Demontage">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:parallelGateway id="Gateway_Join_Arbeit">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:incoming>Flow_Teile_Nein</bpmn:incoming>
+      <bpmn:incoming>Flow_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_16</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:manualTask id="Task_Montage" name="Montage durchfuehren">
+      <bpmn:incoming>Flow_16</bpmn:incoming>
+      <bpmn:outgoing>Flow_17</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:userTask id="Task_Rechnung" name="Rechnung stellen">
+      <bpmn:incoming>Flow_17</bpmn:incoming>
+      <bpmn:outgoing>Flow_18</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Ueberweisen" name="Geld ueberweisen">
+      <bpmn:incoming>Flow_18</bpmn:incoming>
+      <bpmn:outgoing>Flow_19</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="Event_Geldeingang" name="Geld eingegangen">
+      <bpmn:incoming>Flow_19</bpmn:incoming>
+      <bpmn:outgoing>Flow_20</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_4" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:manualTask id="Task_Abholen" name="Fahrrad abholen">
+      <bpmn:incoming>Flow_21</bpmn:incoming>
+      <bpmn:outgoing>Flow_1e506bp</bpmn:outgoing>
+    </bpmn:manualTask>
+    <bpmn:endEvent id="EndEvent_1" name="Prozess beendet">
+      <bpmn:incoming>Flow_1e506bp</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Task_Abholbescheid" name="Abholungsbescheid senden">
+      <bpmn:incoming>Flow_23</bpmn:incoming>
+      <bpmn:outgoing>Flow_21</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_Join_Ablehnung">
+      <bpmn:incoming>Flow_ToJoinAblehnung1</bpmn:incoming>
+      <bpmn:incoming>Flow_ToJoinAblehnung2</bpmn:incoming>
+      <bpmn:incoming>Flow_20</bpmn:incoming>
+      <bpmn:outgoing>Flow_23</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="Event_Abgelehnt" name="Angebot abgelehnt">
+      <bpmn:incoming>Flow_ToAbgelehnt</bpmn:incoming>
+      <bpmn:outgoing>Flow_ToJoinAblehnung1</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_2" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Event_TeileErhalten" name="Teile erhalten">
+      <bpmn:incoming>Flow_1d0y5w5</bpmn:incoming>
+      <bpmn:outgoing>Flow_14</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_3" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1nfjbd1" sourceRef="StartEvent_1" targetRef="Task_Identifizieren" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Identifizieren" targetRef="Task_Angebot" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_Angebot" targetRef="Gateway_Warten" />
+    <bpmn:sequenceFlow id="Flow_ToAngenommen" sourceRef="Gateway_Warten" targetRef="Event_Angenommen" />
+    <bpmn:sequenceFlow id="Flow_ToAbgelehnt" sourceRef="Gateway_Warten" targetRef="Event_Abgelehnt" />
+    <bpmn:sequenceFlow id="Flow_ToTimeout" sourceRef="Gateway_Warten" targetRef="Event_Timeout" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Event_Angenommen" targetRef="Gateway_Split_Arbeit" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Gateway_Split_Arbeit" targetRef="Task_Demontage" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Gateway_Split_Arbeit" targetRef="Task_Bestand" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Task_Bestand" targetRef="Gateway_Teile" />
+    <bpmn:sequenceFlow id="Flow_Teile_Ja" name="Ja" sourceRef="Gateway_Teile" targetRef="Task_Bestellung" />
+    <bpmn:sequenceFlow id="Flow_Teile_Nein" name="Nein" sourceRef="Gateway_Teile" targetRef="Gateway_Join_Arbeit" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Task_Bestellung" targetRef="Task_BestellungAufnehmen" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_BestellungAufnehmen" targetRef="Task_Kommissionieren" />
+    <bpmn:sequenceFlow id="Flow_0pdm2wi" sourceRef="Task_Kommissionieren" targetRef="Task_Verpacken" />
+    <bpmn:sequenceFlow id="Flow_0u5cb28" sourceRef="Task_Verpacken" targetRef="Task_Versenden" />
+    <bpmn:sequenceFlow id="Flow_1d0y5w5" sourceRef="Task_Versenden" targetRef="Event_TeileErhalten" />
+    <bpmn:sequenceFlow id="Flow_ToJoinAblehnung2" sourceRef="Event_Timeout" targetRef="Gateway_Join_Ablehnung" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_Demontage" targetRef="Gateway_Join_Arbeit" />
+    <bpmn:sequenceFlow id="Flow_14" sourceRef="Event_TeileErhalten" targetRef="Gateway_Join_Arbeit" />
+    <bpmn:sequenceFlow id="Flow_16" sourceRef="Gateway_Join_Arbeit" targetRef="Task_Montage" />
+    <bpmn:sequenceFlow id="Flow_17" sourceRef="Task_Montage" targetRef="Task_Rechnung" />
+    <bpmn:sequenceFlow id="Flow_18" sourceRef="Task_Rechnung" targetRef="Task_Ueberweisen" />
+    <bpmn:sequenceFlow id="Flow_19" sourceRef="Task_Ueberweisen" targetRef="Event_Geldeingang" />
+    <bpmn:sequenceFlow id="Flow_20" sourceRef="Event_Geldeingang" targetRef="Gateway_Join_Ablehnung" />
+    <bpmn:sequenceFlow id="Flow_21" sourceRef="Task_Abholbescheid" targetRef="Task_Abholen" />
+    <bpmn:sequenceFlow id="Flow_1e506bp" sourceRef="Task_Abholen" targetRef="EndEvent_1" />
+    <bpmn:sequenceFlow id="Flow_23" sourceRef="Gateway_Join_Ablehnung" targetRef="Task_Abholbescheid" />
+    <bpmn:sequenceFlow id="Flow_ToJoinAblehnung1" sourceRef="Event_Abgelehnt" targetRef="Gateway_Join_Ablehnung" />
+    <bpmn:startEvent id="StartEvent_1" name="Fahrrad gebracht">
+      <bpmn:outgoing>Flow_1nfjbd1</bpmn:outgoing>
+    </bpmn:startEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="Participant_Reparatur_di" bpmnElement="Participant_Reparatur" isHorizontal="true">
+        <dc:Bounds x="120" y="80" width="2450" height="850" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Hersteller_di" bpmnElement="Lane_Hersteller" isHorizontal="true">
+        <dc:Bounds x="150" y="695" width="2420" height="235" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Radladen_di" bpmnElement="Lane_Radladen" isHorizontal="true">
+        <dc:Bounds x="150" y="355" width="2420" height="340" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Kunde_di" bpmnElement="Lane_Kunde" isHorizontal="true">
+        <dc:Bounds x="150" y="80" width="2420" height="275" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Identifizieren_di" bpmnElement="Task_Identifizieren">
+        <dc:Bounds x="250" y="385" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Angebot_di" bpmnElement="Task_Angebot">
+        <dc:Bounds x="380" y="385" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Warten_di" bpmnElement="Gateway_Warten">
+        <dc:Bounds x="520" y="400" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="517" y="450" width="56" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Angenommen_di" bpmnElement="Event_Angenommen">
+        <dc:Bounds x="610" y="360" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="594" y="396" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Split_Arbeit_di" bpmnElement="Gateway_Split_Arbeit">
+        <dc:Bounds x="690" y="353" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Bestand_di" bpmnElement="Task_Bestand">
+        <dc:Bounds x="770" y="425" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Teile_di" bpmnElement="Gateway_Teile" isMarkerVisible="true">
+        <dc:Bounds x="920" y="440" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="907" y="490" width="76" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Bestellung_di" bpmnElement="Task_Bestellung">
+        <dc:Bounds x="1020" y="425" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_BestellungAufnehmen_di" bpmnElement="Task_BestellungAufnehmen">
+        <dc:Bounds x="1020" y="780" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Kommissionieren_di" bpmnElement="Task_Kommissionieren">
+        <dc:Bounds x="1230" y="780" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Versenden_di" bpmnElement="Task_Versenden">
+        <dc:Bounds x="1610" y="780" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Verpacken_di" bpmnElement="Task_Verpacken">
+        <dc:Bounds x="1430" y="780" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Timeout_di" bpmnElement="Event_Timeout">
+        <dc:Bounds x="610" y="622" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="584" y="658" width="88" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Demontage_di" bpmnElement="Task_Demontage">
+        <dc:Bounds x="770" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Join_Arbeit_di" bpmnElement="Gateway_Join_Arbeit">
+        <dc:Bounds x="1680" y="425" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Montage_di" bpmnElement="Task_Montage">
+        <dc:Bounds x="1790" y="410" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Rechnung_di" bpmnElement="Task_Rechnung">
+        <dc:Bounds x="1940" y="410" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Ueberweisen_di" bpmnElement="Task_Ueberweisen">
+        <dc:Bounds x="1940" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Geldeingang_di" bpmnElement="Event_Geldeingang">
+        <dc:Bounds x="2092" y="222" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2065" y="198" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Abholen_di" bpmnElement="Task_Abholen">
+        <dc:Bounds x="2220" y="210" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="2382" y="232" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2358" y="268" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Abholbescheid_di" bpmnElement="Task_Abholbescheid">
+        <dc:Bounds x="2220" y="423" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Join_Ablehnung_di" bpmnElement="Gateway_Join_Ablehnung" isMarkerVisible="true">
+        <dc:Bounds x="2085" y="438" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_Abgelehnt_di" bpmnElement="Event_Abgelehnt">
+        <dc:Bounds x="610" y="522" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="603" y="558" width="50" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_TeileErhalten_di" bpmnElement="Event_TeileErhalten">
+        <dc:Bounds x="1590" y="432" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1575" y="408" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="282" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="257" y="168" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1nfjbd1_di" bpmnElement="Flow_1nfjbd1">
+        <di:waypoint x="300" y="228" />
+        <di:waypoint x="300" y="385" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="350" y="425" />
+        <di:waypoint x="380" y="425" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="480" y="425" />
+        <di:waypoint x="520" y="425" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToAngenommen_di" bpmnElement="Flow_ToAngenommen">
+        <di:waypoint x="545" y="400" />
+        <di:waypoint x="545" y="378" />
+        <di:waypoint x="610" y="378" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToAbgelehnt_di" bpmnElement="Flow_ToAbgelehnt">
+        <di:waypoint x="570" y="425" />
+        <di:waypoint x="590" y="425" />
+        <di:waypoint x="590" y="540" />
+        <di:waypoint x="610" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToTimeout_di" bpmnElement="Flow_ToTimeout">
+        <di:waypoint x="545" y="450" />
+        <di:waypoint x="545" y="640" />
+        <di:waypoint x="610" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="646" y="378" />
+        <di:waypoint x="690" y="378" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="715" y="353" />
+        <di:waypoint x="715" y="230" />
+        <di:waypoint x="770" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="715" y="403" />
+        <di:waypoint x="715" y="465" />
+        <di:waypoint x="770" y="465" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="870" y="465" />
+        <di:waypoint x="920" y="465" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Teile_Ja_di" bpmnElement="Flow_Teile_Ja">
+        <di:waypoint x="970" y="465" />
+        <di:waypoint x="1020" y="465" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="989" y="440" width="12" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Teile_Nein_di" bpmnElement="Flow_Teile_Nein">
+        <di:waypoint x="945" y="440" />
+        <di:waypoint x="945" y="325" />
+        <di:waypoint x="1705" y="325" />
+        <di:waypoint x="1705" y="425" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1314" y="300" width="23" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="1070" y="505" />
+        <di:waypoint x="1070" y="780" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
+        <di:waypoint x="1120" y="820" />
+        <di:waypoint x="1230" y="820" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0pdm2wi_di" bpmnElement="Flow_0pdm2wi">
+        <di:waypoint x="1330" y="820" />
+        <di:waypoint x="1430" y="820" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0u5cb28_di" bpmnElement="Flow_0u5cb28">
+        <di:waypoint x="1530" y="820" />
+        <di:waypoint x="1610" y="820" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1d0y5w5_di" bpmnElement="Flow_1d0y5w5">
+        <di:waypoint x="1660" y="780" />
+        <di:waypoint x="1660" y="624" />
+        <di:waypoint x="1608" y="624" />
+        <di:waypoint x="1608" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToJoinAblehnung2_di" bpmnElement="Flow_ToJoinAblehnung2">
+        <di:waypoint x="646" y="640" />
+        <di:waypoint x="2110" y="640" />
+        <di:waypoint x="2110" y="488" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="870" y="230" />
+        <di:waypoint x="1705" y="230" />
+        <di:waypoint x="1705" y="425" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14">
+        <di:waypoint x="1626" y="450" />
+        <di:waypoint x="1680" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16">
+        <di:waypoint x="1730" y="450" />
+        <di:waypoint x="1790" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17">
+        <di:waypoint x="1890" y="450" />
+        <di:waypoint x="1940" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_di" bpmnElement="Flow_18">
+        <di:waypoint x="1990" y="410" />
+        <di:waypoint x="1990" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_di" bpmnElement="Flow_19">
+        <di:waypoint x="2040" y="240" />
+        <di:waypoint x="2092" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_di" bpmnElement="Flow_20">
+        <di:waypoint x="2110" y="258" />
+        <di:waypoint x="2110" y="438" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_21_di" bpmnElement="Flow_21">
+        <di:waypoint x="2270" y="423" />
+        <di:waypoint x="2270" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e506bp_di" bpmnElement="Flow_1e506bp">
+        <di:waypoint x="2320" y="250" />
+        <di:waypoint x="2382" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_23_di" bpmnElement="Flow_23">
+        <di:waypoint x="2135" y="463" />
+        <di:waypoint x="2220" y="463" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ToJoinAblehnung1_di" bpmnElement="Flow_ToJoinAblehnung1">
+        <di:waypoint x="646" y="540" />
+        <di:waypoint x="2110" y="540" />
+        <di:waypoint x="2110" y="488" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
