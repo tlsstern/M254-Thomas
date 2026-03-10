@@ -64,3 +64,8 @@ When building or designing BPMN models, always adhere to these rules to maintain
    - Do not break sequence flows to represent waiting for an external message. Instead, use explicit Intermediate Catch Events (Message type) connected over sequence flows to securely model wait states.
 5. **Event-Based Gateways for Asynchronous Alternatives**:
    - When a process reaches a point where it must wait for one of multiple possible external messages (e.g., waiting for an Acceptance or a Rejection letter), insert an Event-Based Gateway before the Intermediate Message Catch Events representing each possible response.
+6. **Message Start Events**:
+   - If a participant's process instantiates *because* it received a message from another participant, use a Message Start Event (not a generic None Start Event or Intermediate Catch Event) to begin their pool.
+7. **Deadlock Prevention (Timers and Event-Based Gateways)**:
+   - Always ensure a token can reach an End Event. If a process waits for a message that might never arrive (e.g., the other party "ghosts"), attach a Timer Boundary Event to the waiting task (or use an Event-Based Gateway with a Timer Catch Event) to define a timeout path.
+   - Similarly, if a decision from another party can result in a "Yes" or a "No" (which means wait for Message A or Message B), use an Event-Based Gateway to catch both so the token isn't stuck waiting for the positive path if the negative path is chosen by the other pool.
