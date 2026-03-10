@@ -47,3 +47,20 @@ When the user asks you to create or modify a `.bpmn` (Business Process Model and
 Layout is generated automatically in a naive linear way. If you need explicit placement, you can optionally provide `x` and `y` properties to the nodes in the JSON structure.
 
 The user can always reorganize and refine the layout manually by opening the resulting `.bpmn` file in Camunda Modeler.
+
+## BPMN 2.0 Semantic Rules
+
+When building or designing BPMN models, always adhere to these rules to maintain proper token semantics and technical validity:
+
+1. **Continuous Sequence Flows (Solid Lines)**:
+   - A token must be able to travel continuously from a Start Event to an End Event within the same Pool (Participant).
+   - Sequence flows cannot break or cross the boundaries of a Pool.
+2. **Message Flows (Dashed Lines)**:
+   - Interactions between different Pools (e.g., Tenant vs. Landlord) must be strictly handled via Message Flows.
+   - Message Flows may only connect distinct Pools. They cannot connect elements within the same Pool.
+3. **Sub-Processes for Logical Grouping**:
+   - Use expanded Sub-Processes to group related tasks or loops (e.g., searching for something until found) to keep the main process visually clean and logically structured.
+4. **Intermediate Message Catch Events for Wait States**:
+   - Do not break sequence flows to represent waiting for an external message. Instead, use explicit Intermediate Catch Events (Message type) connected over sequence flows to securely model wait states.
+5. **Event-Based Gateways for Asynchronous Alternatives**:
+   - When a process reaches a point where it must wait for one of multiple possible external messages (e.g., waiting for an Acceptance or a Rejection letter), insert an Event-Based Gateway before the Intermediate Message Catch Events representing each possible response.
