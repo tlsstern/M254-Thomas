@@ -1,412 +1,825 @@
 <?xml version="1.0" ?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="python-bpmn-maker" exporterVersion="2.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  
+
+  
   <bpmn:collaboration id="Collaboration_1">
-    <bpmn:participant id="Participant_Wohnungssuche_Process" name="Wohnungssuche" processRef="Wohnungssuche_Process"/>
+    
+    
+    <bpmn:participant id="Participant_Tenant" name="Wohnungssuchender" processRef="Process_Tenant"/>
+    
+    
+    <bpmn:participant id="Participant_Landlord" name="Vermieter" processRef="Process_Landlord"/>
+    
+    
+    <bpmn:messageFlow id="Msg_1" sourceRef="Task_SendRequest" targetRef="Start_Vermieter"/>
+    
+    
+    <bpmn:messageFlow id="Msg_2" sourceRef="Task_SendRejection" targetRef="Catch_Rejection"/>
+    
+    
+    <bpmn:messageFlow id="Msg_3" sourceRef="Task_SendInvite" targetRef="Catch_Invite"/>
+    
+    
+    <bpmn:messageFlow id="Msg_4" sourceRef="Task_InformInterest" targetRef="Catch_Interest"/>
+    
+    
+    <bpmn:messageFlow id="Msg_5" sourceRef="Task_SendContract" targetRef="Catch_Contract"/>
+    
+    
+    <bpmn:messageFlow id="Msg_6" sourceRef="Task_SendContractBack" targetRef="Catch_ContractBack"/>
+    
+  
   </bpmn:collaboration>
-  <bpmn:process id="Wohnungssuche_Process" name="Wohnungssuche" isExecutable="true">
-    <bpmn:laneSet id="LaneSet_Wohnungssuche_Process">
-      <bpmn:lane id="Lane_Wohnungssuchender" name="Wohnungssuchender">
-        <bpmn:flowNodeRef>Start_1</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_ReadAds</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gw_Found</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_PrepRequest</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_SendRequest</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_ReceiveRejection</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>End_Rejection</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_ReceiveInvite</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_Visit</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gw_Rent</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>End_NoRent</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_InformInterest</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_SignContract</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_SendContractBack</bpmn:flowNodeRef>
-      </bpmn:lane>
-      <bpmn:lane id="Lane_Vermieter" name="Vermieter">
-        <bpmn:flowNodeRef>Task_ReceiveReq</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gw_Interesting</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_SendRejection</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_SendInvite</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_FinalDecision</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gw_RentFinal</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>End_NoRentFinal</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_SendContract</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Task_ReceiveContract</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>End_VermieterSuccess</bpmn:flowNodeRef>
-      </bpmn:lane>
-    </bpmn:laneSet>
+  
+
+  
+  <bpmn:process id="Process_Tenant" isExecutable="true">
+    
+    
     <bpmn:startEvent id="Start_1" name="Wohnung wird benötigt">
-      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+      
+      
+      <bpmn:outgoing>Flow_T1</bpmn:outgoing>
+      
+    
     </bpmn:startEvent>
-    <bpmn:task id="Task_ReadAds" name="Anzeigen lesen und bewerten">
-      <bpmn:incoming>Flow_1</bpmn:incoming>
-      <bpmn:incoming>Flow_3</bpmn:incoming>
-      <bpmn:outgoing>Flow_2</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:exclusiveGateway id="Gw_Found" name="Passende gefunden?">
-      <bpmn:incoming>Flow_2</bpmn:incoming>
-      <bpmn:outgoing>Flow_3</bpmn:outgoing>
-      <bpmn:outgoing>Flow_4</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
+    
+
+    
+    <bpmn:subProcess id="SubProcess_WohnungFinden" name="Wohnung finden">
+      
+      
+      <bpmn:incoming>Flow_T1</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T2</bpmn:outgoing>
+      
+      
+      <bpmn:startEvent id="SubStart">
+        
+        
+        <bpmn:outgoing>Flow_S1</bpmn:outgoing>
+        
+      
+      </bpmn:startEvent>
+      
+      
+      <bpmn:task id="Task_ReadAds" name="Anzeigen lesen">
+        
+        
+        <bpmn:incoming>Flow_S1</bpmn:incoming>
+        
+        
+        <bpmn:incoming>Flow_S3</bpmn:incoming>
+        
+        
+        <bpmn:outgoing>Flow_S2</bpmn:outgoing>
+        
+      
+      </bpmn:task>
+      
+      
+      <bpmn:exclusiveGateway id="Gw_Found" name="Passende gefunden?">
+        
+        
+        <bpmn:incoming>Flow_S2</bpmn:incoming>
+        
+        
+        <bpmn:outgoing>Flow_S3</bpmn:outgoing>
+        
+        
+        <bpmn:outgoing>Flow_S4</bpmn:outgoing>
+        
+      
+      </bpmn:exclusiveGateway>
+      
+      
+      <bpmn:endEvent id="SubEnd">
+        
+        
+        <bpmn:incoming>Flow_S4</bpmn:incoming>
+        
+      
+      </bpmn:endEvent>
+      
+      
+      <bpmn:sequenceFlow id="Flow_S1" sourceRef="SubStart" targetRef="Task_ReadAds"/>
+      
+      
+      <bpmn:sequenceFlow id="Flow_S2" sourceRef="Task_ReadAds" targetRef="Gw_Found"/>
+      
+      
+      <bpmn:sequenceFlow id="Flow_S3" name="Nein" sourceRef="Gw_Found" targetRef="Task_ReadAds"/>
+      
+      
+      <bpmn:sequenceFlow id="Flow_S4" name="Ja" sourceRef="Gw_Found" targetRef="SubEnd"/>
+      
+    
+    </bpmn:subProcess>
+    
+
+    
     <bpmn:task id="Task_PrepRequest" name="Anfrage vorbereiten">
-      <bpmn:incoming>Flow_4</bpmn:incoming>
-      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+      
+      
+      <bpmn:incoming>Flow_T2</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T3</bpmn:outgoing>
+      
+    
     </bpmn:task>
+    
+    
+    
     <bpmn:sendTask id="Task_SendRequest" name="Anfrage versenden">
-      <bpmn:incoming>Flow_5</bpmn:incoming>
-      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+      
+      
+      <bpmn:incoming>Flow_T3</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T4</bpmn:outgoing>
+      
+    
     </bpmn:sendTask>
-    <bpmn:receiveTask id="Task_ReceiveReq" name="Anfrage prüfen">
-      <bpmn:incoming>Flow_6</bpmn:incoming>
-      <bpmn:outgoing>Flow_7</bpmn:outgoing>
-    </bpmn:receiveTask>
-    <bpmn:exclusiveGateway id="Gw_Interesting" name="Interessant?">
-      <bpmn:incoming>Flow_7</bpmn:incoming>
-      <bpmn:outgoing>Flow_8</bpmn:outgoing>
-      <bpmn:outgoing>Flow_11</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:sendTask id="Task_SendRejection" name="Absage senden">
-      <bpmn:incoming>Flow_8</bpmn:incoming>
-      <bpmn:outgoing>Flow_9</bpmn:outgoing>
-    </bpmn:sendTask>
-    <bpmn:sendTask id="Task_SendInvite" name="Einladung senden">
-      <bpmn:incoming>Flow_11</bpmn:incoming>
-      <bpmn:outgoing>Flow_12</bpmn:outgoing>
-    </bpmn:sendTask>
-    <bpmn:receiveTask id="Task_ReceiveRejection" name="Absage erhalten">
-      <bpmn:incoming>Flow_9</bpmn:incoming>
-      <bpmn:outgoing>Flow_10</bpmn:outgoing>
-    </bpmn:receiveTask>
+    
+    
+    
+    <bpmn:eventBasedGateway id="Gw_EventBased">
+      
+      
+      <bpmn:incoming>Flow_T4</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T5</bpmn:outgoing>
+      
+      
+      <bpmn:outgoing>Flow_T6</bpmn:outgoing>
+      
+    
+    </bpmn:eventBasedGateway>
+    
+
+    
+    <bpmn:intermediateCatchEvent id="Catch_Rejection" name="Absage erhalten">
+      
+      
+      <bpmn:incoming>Flow_T5</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T7</bpmn:outgoing>
+      
+      
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1"/>
+      
+    
+    </bpmn:intermediateCatchEvent>
+    
+    
+    
+    <bpmn:intermediateCatchEvent id="Catch_Invite" name="Einladung erhalten">
+      
+      
+      <bpmn:incoming>Flow_T6</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T8</bpmn:outgoing>
+      
+      
+      <bpmn:messageEventDefinition id="MessageEventDefinition_2"/>
+      
+    
+    </bpmn:intermediateCatchEvent>
+    
+    
+    
     <bpmn:endEvent id="End_Rejection" name="Abgeschlossen (Absage)">
-      <bpmn:incoming>Flow_10</bpmn:incoming>
+      
+      
+      <bpmn:incoming>Flow_T7</bpmn:incoming>
+      
+    
     </bpmn:endEvent>
-    <bpmn:receiveTask id="Task_ReceiveInvite" name="Einladung erhalten">
-      <bpmn:incoming>Flow_12</bpmn:incoming>
-      <bpmn:outgoing>Flow_13</bpmn:outgoing>
-    </bpmn:receiveTask>
+    
+
+    
     <bpmn:task id="Task_Visit" name="Wohnung besichtigen">
-      <bpmn:incoming>Flow_13</bpmn:incoming>
-      <bpmn:outgoing>Flow_14</bpmn:outgoing>
+      
+      
+      <bpmn:incoming>Flow_T8</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T9</bpmn:outgoing>
+      
+    
     </bpmn:task>
+    
+
+    
     <bpmn:exclusiveGateway id="Gw_Rent" name="Mieten?">
-      <bpmn:incoming>Flow_14</bpmn:incoming>
-      <bpmn:outgoing>Flow_15</bpmn:outgoing>
-      <bpmn:outgoing>Flow_16</bpmn:outgoing>
+      
+      
+      <bpmn:incoming>Flow_T9</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T10</bpmn:outgoing>
+      
+      
+      <bpmn:outgoing>Flow_T11</bpmn:outgoing>
+      
+    
     </bpmn:exclusiveGateway>
+    
+
+    
     <bpmn:endEvent id="End_NoRent" name="Abgeschlossen (Kein Interesse)">
-      <bpmn:incoming>Flow_15</bpmn:incoming>
+      
+      
+      <bpmn:incoming>Flow_T10</bpmn:incoming>
+      
+    
     </bpmn:endEvent>
+    
+
+    
     <bpmn:sendTask id="Task_InformInterest" name="Interesse mitteilen">
-      <bpmn:incoming>Flow_16</bpmn:incoming>
-      <bpmn:outgoing>Flow_17</bpmn:outgoing>
+      
+      
+      <bpmn:incoming>Flow_T11</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T12</bpmn:outgoing>
+      
+    
     </bpmn:sendTask>
-    <bpmn:task id="Task_FinalDecision" name="Entscheidung treffen">
-      <bpmn:incoming>Flow_17</bpmn:incoming>
-      <bpmn:outgoing>Flow_18</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:exclusiveGateway id="Gw_RentFinal" name="Vermieten?">
-      <bpmn:incoming>Flow_18</bpmn:incoming>
-      <bpmn:outgoing>Flow_19</bpmn:outgoing>
-      <bpmn:outgoing>Flow_20</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:endEvent id="End_NoRentFinal" name="Abgeschlossen (Keine Vermietung)">
-      <bpmn:incoming>Flow_19</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:sendTask id="Task_SendContract" name="Mietvertrag senden">
-      <bpmn:incoming>Flow_20</bpmn:incoming>
-      <bpmn:outgoing>Flow_21</bpmn:outgoing>
-    </bpmn:sendTask>
+    
+
+    
+    <bpmn:intermediateCatchEvent id="Catch_Contract" name="Vertrag erhalten">
+      
+      
+      <bpmn:incoming>Flow_T12</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T13</bpmn:outgoing>
+      
+      
+      <bpmn:messageEventDefinition id="MessageEventDefinition_3"/>
+      
+    
+    </bpmn:intermediateCatchEvent>
+    
+
+    
     <bpmn:task id="Task_SignContract" name="Vertrag unterschreiben">
-      <bpmn:incoming>Flow_21</bpmn:incoming>
-      <bpmn:outgoing>Flow_22</bpmn:outgoing>
+      
+      
+      <bpmn:incoming>Flow_T13</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T14</bpmn:outgoing>
+      
+    
     </bpmn:task>
+    
+
+    
     <bpmn:sendTask id="Task_SendContractBack" name="Vertrag zurücksenden">
-      <bpmn:incoming>Flow_22</bpmn:incoming>
-      <bpmn:outgoing>Flow_23</bpmn:outgoing>
+      
+      
+      <bpmn:incoming>Flow_T14</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_T15</bpmn:outgoing>
+      
+    
     </bpmn:sendTask>
-    <bpmn:receiveTask id="Task_ReceiveContract" name="Vertrag erhalten">
-      <bpmn:incoming>Flow_23</bpmn:incoming>
-      <bpmn:outgoing>Flow_24</bpmn:outgoing>
-    </bpmn:receiveTask>
-    <bpmn:endEvent id="End_VermieterSuccess" name="Wohnung vermietet">
-      <bpmn:incoming>Flow_24</bpmn:incoming>
+    
+
+    
+    <bpmn:endEvent id="End_TenantSuccess" name="Erfolgreich gemietet">
+      
+      
+      <bpmn:incoming>Flow_T15</bpmn:incoming>
+      
+    
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1" sourceRef="Start_1" targetRef="Task_ReadAds" name=""/>
-    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_ReadAds" targetRef="Gw_Found" name=""/>
-    <bpmn:sequenceFlow id="Flow_3" sourceRef="Gw_Found" targetRef="Task_ReadAds" name="Nein"/>
-    <bpmn:sequenceFlow id="Flow_4" sourceRef="Gw_Found" targetRef="Task_PrepRequest" name="Ja"/>
-    <bpmn:sequenceFlow id="Flow_5" sourceRef="Task_PrepRequest" targetRef="Task_SendRequest" name=""/>
-    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_SendRequest" targetRef="Task_ReceiveReq" name=""/>
-    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_ReceiveReq" targetRef="Gw_Interesting" name=""/>
-    <bpmn:sequenceFlow id="Flow_8" sourceRef="Gw_Interesting" targetRef="Task_SendRejection" name="Nein"/>
-    <bpmn:sequenceFlow id="Flow_9" sourceRef="Task_SendRejection" targetRef="Task_ReceiveRejection" name=""/>
-    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_ReceiveRejection" targetRef="End_Rejection" name=""/>
-    <bpmn:sequenceFlow id="Flow_11" sourceRef="Gw_Interesting" targetRef="Task_SendInvite" name="Ja"/>
-    <bpmn:sequenceFlow id="Flow_12" sourceRef="Task_SendInvite" targetRef="Task_ReceiveInvite" name=""/>
-    <bpmn:sequenceFlow id="Flow_13" sourceRef="Task_ReceiveInvite" targetRef="Task_Visit" name=""/>
-    <bpmn:sequenceFlow id="Flow_14" sourceRef="Task_Visit" targetRef="Gw_Rent" name=""/>
-    <bpmn:sequenceFlow id="Flow_15" sourceRef="Gw_Rent" targetRef="End_NoRent" name="Nein"/>
-    <bpmn:sequenceFlow id="Flow_16" sourceRef="Gw_Rent" targetRef="Task_InformInterest" name="Ja"/>
-    <bpmn:sequenceFlow id="Flow_17" sourceRef="Task_InformInterest" targetRef="Task_FinalDecision" name=""/>
-    <bpmn:sequenceFlow id="Flow_18" sourceRef="Task_FinalDecision" targetRef="Gw_RentFinal" name=""/>
-    <bpmn:sequenceFlow id="Flow_19" sourceRef="Gw_RentFinal" targetRef="End_NoRentFinal" name="Nein"/>
-    <bpmn:sequenceFlow id="Flow_20" sourceRef="Gw_RentFinal" targetRef="Task_SendContract" name="Ja"/>
-    <bpmn:sequenceFlow id="Flow_21" sourceRef="Task_SendContract" targetRef="Task_SignContract" name=""/>
-    <bpmn:sequenceFlow id="Flow_22" sourceRef="Task_SignContract" targetRef="Task_SendContractBack" name=""/>
-    <bpmn:sequenceFlow id="Flow_23" sourceRef="Task_SendContractBack" targetRef="Task_ReceiveContract" name=""/>
-    <bpmn:sequenceFlow id="Flow_24" sourceRef="Task_ReceiveContract" targetRef="End_VermieterSuccess" name=""/>
+    
+
+    
+    
+    <bpmn:sequenceFlow id="Flow_T1" sourceRef="Start_1" targetRef="SubProcess_WohnungFinden"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T2" sourceRef="SubProcess_WohnungFinden" targetRef="Task_PrepRequest"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T3" sourceRef="Task_PrepRequest" targetRef="Task_SendRequest"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T4" sourceRef="Task_SendRequest" targetRef="Gw_EventBased"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T5" sourceRef="Gw_EventBased" targetRef="Catch_Rejection"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T6" sourceRef="Gw_EventBased" targetRef="Catch_Invite"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T7" sourceRef="Catch_Rejection" targetRef="End_Rejection"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T8" sourceRef="Catch_Invite" targetRef="Task_Visit"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T9" sourceRef="Task_Visit" targetRef="Gw_Rent"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T10" name="Nein" sourceRef="Gw_Rent" targetRef="End_NoRent"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T11" name="Ja" sourceRef="Gw_Rent" targetRef="Task_InformInterest"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T12" sourceRef="Task_InformInterest" targetRef="Catch_Contract"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T13" sourceRef="Catch_Contract" targetRef="Task_SignContract"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T14" sourceRef="Task_SignContract" targetRef="Task_SendContractBack"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_T15" sourceRef="Task_SendContractBack" targetRef="End_TenantSuccess"/>
+    
+  
   </bpmn:process>
+  
+
+  
+  <bpmn:process id="Process_Landlord" isExecutable="true">
+    
+    
+    <bpmn:startEvent id="Start_Vermieter" name="Anfrage erhalten">
+      
+      
+      <bpmn:outgoing>Flow_V1</bpmn:outgoing>
+      
+      
+      <bpmn:messageEventDefinition id="MessageEventDefinition_4"/>
+      
+    
+    </bpmn:startEvent>
+    
+
+    
+    <bpmn:exclusiveGateway id="Gw_Interesting" name="Interessant?">
+      
+      
+      <bpmn:incoming>Flow_V1</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_V2</bpmn:outgoing>
+      
+      
+      <bpmn:outgoing>Flow_V3</bpmn:outgoing>
+      
+    
+    </bpmn:exclusiveGateway>
+    
+
+    
+    <bpmn:sendTask id="Task_SendRejection" name="Absage senden">
+      
+      
+      <bpmn:incoming>Flow_V2</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_V4</bpmn:outgoing>
+      
+    
+    </bpmn:sendTask>
+    
+
+    
+    <bpmn:endEvent id="End_V_Rejection" name="Abgeschlossen">
+      
+      
+      <bpmn:incoming>Flow_V4</bpmn:incoming>
+      
+    
+    </bpmn:endEvent>
+    
+
+    
+    <bpmn:sendTask id="Task_SendInvite" name="Einladung senden">
+      
+      
+      <bpmn:incoming>Flow_V3</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_V5</bpmn:outgoing>
+      
+    
+    </bpmn:sendTask>
+    
+
+    
+    <bpmn:intermediateCatchEvent id="Catch_Interest" name="Interesse empfangen">
+      
+      
+      <bpmn:incoming>Flow_V5</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_V6</bpmn:outgoing>
+      
+      
+      <bpmn:messageEventDefinition id="MessageEventDefinition_5"/>
+      
+    
+    </bpmn:intermediateCatchEvent>
+    
+
+    
+    <bpmn:task id="Task_FinalDecision" name="Entscheidung treffen">
+      
+      
+      <bpmn:incoming>Flow_V6</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_V7</bpmn:outgoing>
+      
+    
+    </bpmn:task>
+    
+
+    
+    <bpmn:exclusiveGateway id="Gw_RentFinal" name="Vermieten?">
+      
+      
+      <bpmn:incoming>Flow_V7</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_V8</bpmn:outgoing>
+      
+      
+      <bpmn:outgoing>Flow_V9</bpmn:outgoing>
+      
+    
+    </bpmn:exclusiveGateway>
+    
+
+    
+    <bpmn:endEvent id="End_NoRentFinal" name="Keine Vermietung">
+      
+      
+      <bpmn:incoming>Flow_V8</bpmn:incoming>
+      
+    
+    </bpmn:endEvent>
+    
+
+    
+    <bpmn:sendTask id="Task_SendContract" name="Mietvertrag senden">
+      
+      
+      <bpmn:incoming>Flow_V9</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_V10</bpmn:outgoing>
+      
+    
+    </bpmn:sendTask>
+    
+
+    
+    <bpmn:intermediateCatchEvent id="Catch_ContractBack" name="Vertrag erhalten">
+      
+      
+      <bpmn:incoming>Flow_V10</bpmn:incoming>
+      
+      
+      <bpmn:outgoing>Flow_V11</bpmn:outgoing>
+      
+      
+      <bpmn:messageEventDefinition id="MessageEventDefinition_6"/>
+      
+    
+    </bpmn:intermediateCatchEvent>
+    
+
+    
+    <bpmn:endEvent id="End_VermieterSuccess" name="Wohnung vermietet">
+      
+      
+      <bpmn:incoming>Flow_V11</bpmn:incoming>
+      
+    
+    </bpmn:endEvent>
+    
+
+    
+    
+    <bpmn:sequenceFlow id="Flow_V1" sourceRef="Start_Vermieter" targetRef="Gw_Interesting"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V2" name="Nein" sourceRef="Gw_Interesting" targetRef="Task_SendRejection"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V3" name="Ja" sourceRef="Gw_Interesting" targetRef="Task_SendInvite"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V4" sourceRef="Task_SendRejection" targetRef="End_V_Rejection"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V5" sourceRef="Task_SendInvite" targetRef="Catch_Interest"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V6" sourceRef="Catch_Interest" targetRef="Task_FinalDecision"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V7" sourceRef="Task_FinalDecision" targetRef="Gw_RentFinal"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V8" name="Nein" sourceRef="Gw_RentFinal" targetRef="End_NoRentFinal"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V9" name="Ja" sourceRef="Gw_RentFinal" targetRef="Task_SendContract"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V10" sourceRef="Task_SendContract" targetRef="Catch_ContractBack"/>
+    
+    
+    <bpmn:sequenceFlow id="Flow_V11" sourceRef="Catch_ContractBack" targetRef="End_VermieterSuccess"/>
+    
+  
+  </bpmn:process>
+  
+
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
-      <bpmndi:BPMNShape id="Participant_Wohnungssuche_Process_di" bpmnElement="Participant_Wohnungssuche_Process" isHorizontal="true">
-        <dc:Bounds x="150" y="100" width="3600" height="480"/>
+      <bpmndi:BPMNShape id="Participant_Tenant_di" bpmnElement="Participant_Tenant" isHorizontal="true">
+        <dc:Bounds x="150" y="80" width="2050" height="360"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_Wohnungssuchender_di" bpmnElement="Lane_Wohnungssuchender" isHorizontal="true">
-        <dc:Bounds x="180" y="100" width="3570" height="240"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_Vermieter_di" bpmnElement="Lane_Vermieter" isHorizontal="true">
-        <dc:Bounds x="180" y="340" width="3570" height="240"/>
+      <bpmndi:BPMNShape id="Participant_Landlord_di" bpmnElement="Participant_Landlord" isHorizontal="true">
+        <dc:Bounds x="150" y="500" width="2050" height="420"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Start_1_di" bpmnElement="Start_1">
-        <dc:Bounds x="282" y="152" width="36" height="36"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="272" y="193" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+        <dc:Bounds x="200" y="220" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_WohnungFinden_di" bpmnElement="SubProcess_WohnungFinden" isExpanded="true">
+        <dc:Bounds x="280" y="140" width="340" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubStart_di" bpmnElement="SubStart">
+        <dc:Bounds x="300" y="200" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_ReadAds_di" bpmnElement="Task_ReadAds">
-        <dc:Bounds x="430" y="130" width="100" height="80"/>
+        <dc:Bounds x="370" y="180" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Found_di" bpmnElement="Gw_Found">
-        <dc:Bounds x="635" y="145" width="50" height="50"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="625" y="200" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+        <dc:Bounds x="500" y="195" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubEnd_di" bpmnElement="SubEnd">
+        <dc:Bounds x="580" y="200" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_PrepRequest_di" bpmnElement="Task_PrepRequest">
-        <dc:Bounds x="790" y="130" width="100" height="80"/>
+        <dc:Bounds x="660" y="180" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_SendRequest_di" bpmnElement="Task_SendRequest">
-        <dc:Bounds x="970" y="130" width="100" height="80"/>
+        <dc:Bounds x="800" y="180" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_ReceiveReq_di" bpmnElement="Task_ReceiveReq">
-        <dc:Bounds x="1150" y="370" width="100" height="80"/>
+      <bpmndi:BPMNShape id="Gw_EventBased_di" bpmnElement="Gw_EventBased">
+        <dc:Bounds x="940" y="195" width="50" height="50"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gw_Interesting_di" bpmnElement="Gw_Interesting">
-        <dc:Bounds x="1355" y="385" width="50" height="50"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1345" y="440" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_SendRejection_di" bpmnElement="Task_SendRejection">
-        <dc:Bounds x="1510" y="370" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_SendInvite_di" bpmnElement="Task_SendInvite">
-        <dc:Bounds x="1510" y="470" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_ReceiveRejection_di" bpmnElement="Task_ReceiveRejection">
-        <dc:Bounds x="1690" y="130" width="100" height="80"/>
+      <bpmndi:BPMNShape id="Catch_Rejection_di" bpmnElement="Catch_Rejection">
+        <dc:Bounds x="1040" y="120" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_Rejection_di" bpmnElement="End_Rejection">
-        <dc:Bounds x="1902" y="152" width="36" height="36"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1892" y="193" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+        <dc:Bounds x="1140" y="120" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_ReceiveInvite_di" bpmnElement="Task_ReceiveInvite">
-        <dc:Bounds x="1690" y="230" width="100" height="80"/>
+      <bpmndi:BPMNShape id="Catch_Invite_di" bpmnElement="Catch_Invite">
+        <dc:Bounds x="1040" y="260" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_Visit_di" bpmnElement="Task_Visit">
-        <dc:Bounds x="1870" y="230" width="100" height="80"/>
+        <dc:Bounds x="1130" y="240" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Rent_di" bpmnElement="Gw_Rent">
-        <dc:Bounds x="2075" y="145" width="50" height="50"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2065" y="200" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+        <dc:Bounds x="1260" y="255" width="50" height="50"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_NoRent_di" bpmnElement="End_NoRent">
-        <dc:Bounds x="2262" y="152" width="36" height="36"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2252" y="193" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+        <dc:Bounds x="1350" y="150" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_InformInterest_di" bpmnElement="Task_InformInterest">
-        <dc:Bounds x="2230" y="230" width="100" height="80"/>
+        <dc:Bounds x="1350" y="240" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_FinalDecision_di" bpmnElement="Task_FinalDecision">
-        <dc:Bounds x="2410" y="370" width="100" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gw_RentFinal_di" bpmnElement="Gw_RentFinal">
-        <dc:Bounds x="2615" y="385" width="50" height="50"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2605" y="440" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="End_NoRentFinal_di" bpmnElement="End_NoRentFinal">
-        <dc:Bounds x="2802" y="392" width="36" height="36"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2792" y="433" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_SendContract_di" bpmnElement="Task_SendContract">
-        <dc:Bounds x="2770" y="470" width="100" height="80"/>
+      <bpmndi:BPMNShape id="Catch_Contract_di" bpmnElement="Catch_Contract">
+        <dc:Bounds x="1730" y="260" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_SignContract_di" bpmnElement="Task_SignContract">
-        <dc:Bounds x="2950" y="130" width="100" height="80"/>
+        <dc:Bounds x="1810" y="240" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_SendContractBack_di" bpmnElement="Task_SendContractBack">
-        <dc:Bounds x="3130" y="130" width="100" height="80"/>
+        <dc:Bounds x="1950" y="240" width="100" height="80"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_ReceiveContract_di" bpmnElement="Task_ReceiveContract">
-        <dc:Bounds x="3310" y="370" width="100" height="80"/>
+      <bpmndi:BPMNShape id="End_TenantSuccess_di" bpmnElement="End_TenantSuccess">
+        <dc:Bounds x="2100" y="260" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Vermieter_di" bpmnElement="Start_Vermieter">
+        <dc:Bounds x="830" y="720" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Interesting_di" bpmnElement="Gw_Interesting">
+        <dc:Bounds x="910" y="715" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SendRejection_di" bpmnElement="Task_SendRejection">
+        <dc:Bounds x="1000" y="600" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_V_Rejection_di" bpmnElement="End_V_Rejection">
+        <dc:Bounds x="1150" y="620" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SendInvite_di" bpmnElement="Task_SendInvite">
+        <dc:Bounds x="1000" y="780" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Catch_Interest_di" bpmnElement="Catch_Interest">
+        <dc:Bounds x="1380" y="800" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_FinalDecision_di" bpmnElement="Task_FinalDecision">
+        <dc:Bounds x="1480" y="780" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_RentFinal_di" bpmnElement="Gw_RentFinal">
+        <dc:Bounds x="1610" y="795" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_NoRentFinal_di" bpmnElement="End_NoRentFinal">
+        <dc:Bounds x="1710" y="680" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SendContract_di" bpmnElement="Task_SendContract">
+        <dc:Bounds x="1700" y="780" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Catch_ContractBack_di" bpmnElement="Catch_ContractBack">
+        <dc:Bounds x="1970" y="800" width="36" height="36"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_VermieterSuccess_di" bpmnElement="End_VermieterSuccess">
-        <dc:Bounds x="3522" y="392" width="36" height="36"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="3512" y="433" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+        <dc:Bounds x="2070" y="800" width="36" height="36"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
-        <di:waypoint x="318" y="170"/>
-        <di:waypoint x="430" y="170"/>
+      <bpmndi:BPMNEdge id="Flow_S1_di" bpmnElement="Flow_S1">
+        <di:waypoint x="318" y="218"/>
+        <di:waypoint x="420" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
-        <di:waypoint x="530" y="170"/>
-        <di:waypoint x="635" y="170"/>
+      <bpmndi:BPMNEdge id="Flow_S2_di" bpmnElement="Flow_S2">
+        <di:waypoint x="420" y="220"/>
+        <di:waypoint x="525" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
-        <di:waypoint x="685" y="170"/>
-        <di:waypoint x="685" y="230"/>
-        <di:waypoint x="400" y="230"/>
-        <di:waypoint x="400" y="170"/>
-        <di:waypoint x="430" y="170"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="547" y="155" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_S3_di" bpmnElement="Flow_S3">
+        <di:waypoint x="525" y="220"/>
+        <di:waypoint x="420" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
-        <di:waypoint x="685" y="170"/>
-        <di:waypoint x="790" y="170"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="727" y="155" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_S4_di" bpmnElement="Flow_S4">
+        <di:waypoint x="525" y="220"/>
+        <di:waypoint x="598" y="218"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
-        <di:waypoint x="890" y="170"/>
-        <di:waypoint x="970" y="170"/>
+      <bpmndi:BPMNEdge id="Flow_T1_di" bpmnElement="Flow_T1">
+        <di:waypoint x="218" y="238"/>
+        <di:waypoint x="334" y="238"/>
+        <di:waypoint x="334" y="220"/>
+        <di:waypoint x="450" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
-        <di:waypoint x="1070" y="170"/>
-        <di:waypoint x="1110" y="170"/>
-        <di:waypoint x="1110" y="410"/>
-        <di:waypoint x="1150" y="410"/>
+      <bpmndi:BPMNEdge id="Flow_T2_di" bpmnElement="Flow_T2">
+        <di:waypoint x="450" y="220"/>
+        <di:waypoint x="710" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
-        <di:waypoint x="1250" y="410"/>
-        <di:waypoint x="1355" y="410"/>
+      <bpmndi:BPMNEdge id="Flow_T3_di" bpmnElement="Flow_T3">
+        <di:waypoint x="710" y="220"/>
+        <di:waypoint x="850" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
-        <di:waypoint x="1405" y="410"/>
-        <di:waypoint x="1510" y="410"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1447" y="395" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_T4_di" bpmnElement="Flow_T4">
+        <di:waypoint x="850" y="220"/>
+        <di:waypoint x="965" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
-        <di:waypoint x="1610" y="410"/>
-        <di:waypoint x="1650" y="410"/>
-        <di:waypoint x="1650" y="170"/>
-        <di:waypoint x="1690" y="170"/>
+      <bpmndi:BPMNEdge id="Flow_T5_di" bpmnElement="Flow_T5">
+        <di:waypoint x="965" y="220"/>
+        <di:waypoint x="1011" y="220"/>
+        <di:waypoint x="1011" y="138"/>
+        <di:waypoint x="1058" y="138"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
-        <di:waypoint x="1790" y="170"/>
-        <di:waypoint x="1902" y="170"/>
+      <bpmndi:BPMNEdge id="Flow_T6_di" bpmnElement="Flow_T6">
+        <di:waypoint x="965" y="220"/>
+        <di:waypoint x="1011" y="220"/>
+        <di:waypoint x="1011" y="278"/>
+        <di:waypoint x="1058" y="278"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
-        <di:waypoint x="1405" y="410"/>
-        <di:waypoint x="1457" y="410"/>
-        <di:waypoint x="1457" y="510"/>
-        <di:waypoint x="1510" y="510"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1447" y="445" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_T7_di" bpmnElement="Flow_T7">
+        <di:waypoint x="1058" y="138"/>
+        <di:waypoint x="1158" y="138"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12">
-        <di:waypoint x="1610" y="510"/>
-        <di:waypoint x="1650" y="510"/>
-        <di:waypoint x="1650" y="270"/>
-        <di:waypoint x="1690" y="270"/>
+      <bpmndi:BPMNEdge id="Flow_T8_di" bpmnElement="Flow_T8">
+        <di:waypoint x="1058" y="278"/>
+        <di:waypoint x="1180" y="280"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13">
-        <di:waypoint x="1790" y="270"/>
-        <di:waypoint x="1870" y="270"/>
+      <bpmndi:BPMNEdge id="Flow_T9_di" bpmnElement="Flow_T9">
+        <di:waypoint x="1180" y="280"/>
+        <di:waypoint x="1285" y="280"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14">
-        <di:waypoint x="1970" y="270"/>
-        <di:waypoint x="2022" y="270"/>
-        <di:waypoint x="2022" y="170"/>
-        <di:waypoint x="2075" y="170"/>
+      <bpmndi:BPMNEdge id="Flow_T10_di" bpmnElement="Flow_T10">
+        <di:waypoint x="1285" y="280"/>
+        <di:waypoint x="1326" y="280"/>
+        <di:waypoint x="1326" y="168"/>
+        <di:waypoint x="1368" y="168"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15">
-        <di:waypoint x="2125" y="170"/>
-        <di:waypoint x="2262" y="170"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2183" y="155" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_T11_di" bpmnElement="Flow_T11">
+        <di:waypoint x="1285" y="280"/>
+        <di:waypoint x="1400" y="280"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16">
-        <di:waypoint x="2125" y="170"/>
-        <di:waypoint x="2177" y="170"/>
-        <di:waypoint x="2177" y="270"/>
-        <di:waypoint x="2230" y="270"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2167" y="205" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_T12_di" bpmnElement="Flow_T12">
+        <di:waypoint x="1400" y="280"/>
+        <di:waypoint x="1748" y="278"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17">
-        <di:waypoint x="2330" y="270"/>
-        <di:waypoint x="2370" y="270"/>
-        <di:waypoint x="2370" y="410"/>
-        <di:waypoint x="2410" y="410"/>
+      <bpmndi:BPMNEdge id="Flow_T13_di" bpmnElement="Flow_T13">
+        <di:waypoint x="1748" y="278"/>
+        <di:waypoint x="1860" y="280"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_18_di" bpmnElement="Flow_18">
-        <di:waypoint x="2510" y="410"/>
-        <di:waypoint x="2615" y="410"/>
+      <bpmndi:BPMNEdge id="Flow_T14_di" bpmnElement="Flow_T14">
+        <di:waypoint x="1860" y="280"/>
+        <di:waypoint x="2000" y="280"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_19_di" bpmnElement="Flow_19">
-        <di:waypoint x="2665" y="410"/>
-        <di:waypoint x="2802" y="410"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2723" y="395" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_T15_di" bpmnElement="Flow_T15">
+        <di:waypoint x="2000" y="280"/>
+        <di:waypoint x="2118" y="278"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_20_di" bpmnElement="Flow_20">
-        <di:waypoint x="2665" y="410"/>
-        <di:waypoint x="2717" y="410"/>
-        <di:waypoint x="2717" y="510"/>
-        <di:waypoint x="2770" y="510"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2707" y="445" width="60" height="14"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_V1_di" bpmnElement="Flow_V1">
+        <di:waypoint x="848" y="738"/>
+        <di:waypoint x="935" y="740"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_21_di" bpmnElement="Flow_21">
-        <di:waypoint x="2870" y="510"/>
-        <di:waypoint x="2910" y="510"/>
-        <di:waypoint x="2910" y="170"/>
-        <di:waypoint x="2950" y="170"/>
+      <bpmndi:BPMNEdge id="Flow_V2_di" bpmnElement="Flow_V2">
+        <di:waypoint x="935" y="740"/>
+        <di:waypoint x="992" y="740"/>
+        <di:waypoint x="992" y="640"/>
+        <di:waypoint x="1050" y="640"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_22_di" bpmnElement="Flow_22">
-        <di:waypoint x="3050" y="170"/>
-        <di:waypoint x="3130" y="170"/>
+      <bpmndi:BPMNEdge id="Flow_V3_di" bpmnElement="Flow_V3">
+        <di:waypoint x="935" y="740"/>
+        <di:waypoint x="992" y="740"/>
+        <di:waypoint x="992" y="820"/>
+        <di:waypoint x="1050" y="820"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_23_di" bpmnElement="Flow_23">
-        <di:waypoint x="3230" y="170"/>
-        <di:waypoint x="3270" y="170"/>
-        <di:waypoint x="3270" y="410"/>
-        <di:waypoint x="3310" y="410"/>
+      <bpmndi:BPMNEdge id="Flow_V4_di" bpmnElement="Flow_V4">
+        <di:waypoint x="1050" y="640"/>
+        <di:waypoint x="1168" y="638"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_24_di" bpmnElement="Flow_24">
-        <di:waypoint x="3410" y="410"/>
-        <di:waypoint x="3522" y="410"/>
+      <bpmndi:BPMNEdge id="Flow_V5_di" bpmnElement="Flow_V5">
+        <di:waypoint x="1050" y="820"/>
+        <di:waypoint x="1398" y="818"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_V6_di" bpmnElement="Flow_V6">
+        <di:waypoint x="1398" y="818"/>
+        <di:waypoint x="1530" y="820"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_V7_di" bpmnElement="Flow_V7">
+        <di:waypoint x="1530" y="820"/>
+        <di:waypoint x="1635" y="820"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_V8_di" bpmnElement="Flow_V8">
+        <di:waypoint x="1635" y="820"/>
+        <di:waypoint x="1681" y="820"/>
+        <di:waypoint x="1681" y="698"/>
+        <di:waypoint x="1728" y="698"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_V9_di" bpmnElement="Flow_V9">
+        <di:waypoint x="1635" y="820"/>
+        <di:waypoint x="1750" y="820"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_V10_di" bpmnElement="Flow_V10">
+        <di:waypoint x="1750" y="820"/>
+        <di:waypoint x="1988" y="818"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_V11_di" bpmnElement="Flow_V11">
+        <di:waypoint x="1988" y="818"/>
+        <di:waypoint x="2088" y="818"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_1_di" bpmnElement="Msg_1">
+        <di:waypoint x="850" y="220"/>
+        <di:waypoint x="848" y="738"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_2_di" bpmnElement="Msg_2">
+        <di:waypoint x="1050" y="640"/>
+        <di:waypoint x="1058" y="138"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_3_di" bpmnElement="Msg_3">
+        <di:waypoint x="1050" y="820"/>
+        <di:waypoint x="1058" y="278"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_4_di" bpmnElement="Msg_4">
+        <di:waypoint x="1400" y="280"/>
+        <di:waypoint x="1398" y="818"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_5_di" bpmnElement="Msg_5">
+        <di:waypoint x="1750" y="820"/>
+        <di:waypoint x="1748" y="278"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_6_di" bpmnElement="Msg_6">
+        <di:waypoint x="2000" y="280"/>
+        <di:waypoint x="1994" y="280"/>
+        <di:waypoint x="1994" y="818"/>
+        <di:waypoint x="1988" y="818"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
