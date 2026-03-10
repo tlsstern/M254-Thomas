@@ -1,0 +1,339 @@
+<?xml version="1.0" ?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="python-bpmn-maker" exporterVersion="1.0">
+  <bpmn:process id="Steuerkanzlei_Process" name="Steuererklärung erstellen" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_Mandant" name="Unterlagen eingereicht">
+      <bpmn:outgoing>Flow_Start_Zusammenstellen</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_UnterlagenZusammenstellen" name="Unterlagen zusammenstellen">
+      <bpmn:incoming>Flow_Start_Zusammenstellen</bpmn:incoming>
+      <bpmn:outgoing>Flow_Zusammenstellen_Pruefen</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_UnterlagenPruefen" name="Unterlagen auf Vollständigkeit prüfen">
+      <bpmn:incoming>Flow_Zusammenstellen_Pruefen</bpmn:incoming>
+      <bpmn:outgoing>Flow_Pruefen_GatewayVollstaendig</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_UnterlagenVollstaendig" name="Vollständig?">
+      <bpmn:incoming>Flow_Pruefen_GatewayVollstaendig</bpmn:incoming>
+      <bpmn:outgoing>Flow_GatewayVollstaendig_Nein</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GatewayVollstaendig_Ja</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="Task_MandantKontaktieren" name="Mandant bzgl. fehlender Unterlagen kontaktieren">
+      <bpmn:incoming>Flow_GatewayVollstaendig_Nein</bpmn:incoming>
+      <bpmn:outgoing>Flow_Kontaktieren_Bereitstellen</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:task id="Task_FehlendeUnterlagenBereitstellen" name="Fehlende Unterlagen bereitstellen">
+      <bpmn:incoming>Flow_Kontaktieren_Bereitstellen</bpmn:incoming>
+      <bpmn:outgoing>Flow_Bereitstellen_Weiterleiten_Fehlend</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_FallWeiterleiten" name="Fall an Steuergehilfen weiterleiten">
+      <bpmn:incoming>Flow_Bereitstellen_Weiterleiten_Fehlend</bpmn:incoming>
+      <bpmn:incoming>Flow_GatewayVollstaendig_Ja</bpmn:incoming>
+      <bpmn:outgoing>Flow_Weiterleiten_Einarbeiten</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_UnterlagenEinarbeiten" name="In Unterlagen einarbeiten">
+      <bpmn:incoming>Flow_Weiterleiten_Einarbeiten</bpmn:incoming>
+      <bpmn:incoming>Flow_GatewayEinarbeitungBeendet_Nein</bpmn:incoming>
+      <bpmn:outgoing>Flow_Einarbeiten_GatewayRueckfragen</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Rueckfragen" name="Rückfragen?">
+      <bpmn:incoming>Flow_Einarbeiten_GatewayRueckfragen</bpmn:incoming>
+      <bpmn:outgoing>Flow_GatewayRueckfragen_Ja</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GatewayRueckfragen_Nein</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_RueckfragenKlaeren" name="Rückfragen klären">
+      <bpmn:incoming>Flow_GatewayRueckfragen_Ja</bpmn:incoming>
+      <bpmn:outgoing>Flow_RueckfragenKlaeren_GatewayEinarbeitungBeendet</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_EinarbeitungBeendet" name="Einarbeitung beendet?">
+      <bpmn:incoming>Flow_RueckfragenKlaeren_GatewayEinarbeitungBeendet</bpmn:incoming>
+      <bpmn:outgoing>Flow_GatewayEinarbeitungBeendet_Nein</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GatewayEinarbeitungBeendet_Ja</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_SteuererklaerungBearbeiten" name="Steuererklärung bearbeiten">
+      <bpmn:incoming>Flow_GatewayRueckfragen_Nein</bpmn:incoming>
+      <bpmn:incoming>Flow_GatewayEinarbeitungBeendet_Ja</bpmn:incoming>
+      <bpmn:outgoing>Flow_Bearbeiten_Uebermitteln</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sendTask id="Task_ErklaerungUebermitteln" name="Erklärung an Finanzamt übermitteln">
+      <bpmn:incoming>Flow_Bearbeiten_Uebermitteln</bpmn:incoming>
+      <bpmn:outgoing>Flow_Uebermitteln_FinanzamtBearbeiten</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:task id="Task_SteuerbescheidBearbeiten" name="Steuerbescheid bearbeiten">
+      <bpmn:incoming>Flow_Uebermitteln_FinanzamtBearbeiten</bpmn:incoming>
+      <bpmn:outgoing>Flow_FinanzamtBearbeiten_BescheidErhalten</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:intermediateCatchEvent id="Event_SteuerbescheidErhalten" name="Steuerbescheid erhalten">
+      <bpmn:incoming>Flow_FinanzamtBearbeiten_BescheidErhalten</bpmn:incoming>
+      <bpmn:outgoing>Flow_BescheidErhalten_BescheidPruefen</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:task id="Task_SteuerbescheidPruefen" name="Steuerbescheid prüfen">
+      <bpmn:incoming>Flow_BescheidErhalten_BescheidPruefen</bpmn:incoming>
+      <bpmn:outgoing>Flow_BescheidPruefen_GatewayParallel</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:parallelGateway id="Gateway_Parallel_SendenArchivieren" name="Senden und Archivieren">
+      <bpmn:incoming>Flow_BescheidPruefen_GatewayParallel</bpmn:incoming>
+      <bpmn:outgoing>Flow_GatewayParallel_Senden</bpmn:outgoing>
+      <bpmn:outgoing>Flow_GatewayParallel_Archivieren</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="Task_BescheidAnMandantSenden" name="Bescheid an Mandanten senden">
+      <bpmn:incoming>Flow_GatewayParallel_Senden</bpmn:incoming>
+      <bpmn:outgoing>Flow_Senden_Ablegen</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:task id="Task_BescheidInOrdnerAblegen" name="Bescheid in Ordner ablegen">
+      <bpmn:incoming>Flow_Senden_Ablegen</bpmn:incoming>
+      <bpmn:outgoing>Flow_Ablegen_GatewayParallelEnde</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_BescheidArchivieren" name="Kopie im Archiv ablegen">
+      <bpmn:incoming>Flow_GatewayParallel_Archivieren</bpmn:incoming>
+      <bpmn:outgoing>Flow_Archivieren_GatewayParallelEnde</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:parallelGateway id="Gateway_Parallel_SendenArchivierenEnde" name="Ende Senden und Archivieren">
+      <bpmn:incoming>Flow_Ablegen_GatewayParallelEnde</bpmn:incoming>
+      <bpmn:incoming>Flow_Archivieren_GatewayParallelEnde</bpmn:incoming>
+      <bpmn:outgoing>Flow_GatewayParallelEnde_EndEvent</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:endEvent id="EndEvent_ProzessBeendet" name="Prozess beendet">
+      <bpmn:incoming>Flow_GatewayParallelEnde_EndEvent</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Start_Zusammenstellen" sourceRef="StartEvent_Mandant" targetRef="Task_UnterlagenZusammenstellen" name=""/>
+    <bpmn:sequenceFlow id="Flow_Zusammenstellen_Pruefen" sourceRef="Task_UnterlagenZusammenstellen" targetRef="Task_UnterlagenPruefen" name=""/>
+    <bpmn:sequenceFlow id="Flow_Pruefen_GatewayVollstaendig" sourceRef="Task_UnterlagenPruefen" targetRef="Gateway_UnterlagenVollstaendig" name=""/>
+    <bpmn:sequenceFlow id="Flow_GatewayVollstaendig_Nein" sourceRef="Gateway_UnterlagenVollstaendig" targetRef="Task_MandantKontaktieren" name="Nein"/>
+    <bpmn:sequenceFlow id="Flow_Kontaktieren_Bereitstellen" sourceRef="Task_MandantKontaktieren" targetRef="Task_FehlendeUnterlagenBereitstellen" name=""/>
+    <bpmn:sequenceFlow id="Flow_Bereitstellen_Weiterleiten_Fehlend" sourceRef="Task_FehlendeUnterlagenBereitstellen" targetRef="Task_FallWeiterleiten" name=""/>
+    <bpmn:sequenceFlow id="Flow_GatewayVollstaendig_Ja" sourceRef="Gateway_UnterlagenVollstaendig" targetRef="Task_FallWeiterleiten" name="Ja"/>
+    <bpmn:sequenceFlow id="Flow_Weiterleiten_Einarbeiten" sourceRef="Task_FallWeiterleiten" targetRef="Task_UnterlagenEinarbeiten" name=""/>
+    <bpmn:sequenceFlow id="Flow_Einarbeiten_GatewayRueckfragen" sourceRef="Task_UnterlagenEinarbeiten" targetRef="Gateway_Rueckfragen" name=""/>
+    <bpmn:sequenceFlow id="Flow_GatewayRueckfragen_Ja" sourceRef="Gateway_Rueckfragen" targetRef="Task_RueckfragenKlaeren" name="Ja"/>
+    <bpmn:sequenceFlow id="Flow_GatewayRueckfragen_Nein" sourceRef="Gateway_Rueckfragen" targetRef="Task_SteuererklaerungBearbeiten" name="Nein"/>
+    <bpmn:sequenceFlow id="Flow_RueckfragenKlaeren_GatewayEinarbeitungBeendet" sourceRef="Task_RueckfragenKlaeren" targetRef="Gateway_EinarbeitungBeendet" name=""/>
+    <bpmn:sequenceFlow id="Flow_GatewayEinarbeitungBeendet_Nein" sourceRef="Gateway_EinarbeitungBeendet" targetRef="Task_UnterlagenEinarbeiten" name="Nein"/>
+    <bpmn:sequenceFlow id="Flow_GatewayEinarbeitungBeendet_Ja" sourceRef="Gateway_EinarbeitungBeendet" targetRef="Task_SteuererklaerungBearbeiten" name="Ja"/>
+    <bpmn:sequenceFlow id="Flow_Bearbeiten_Uebermitteln" sourceRef="Task_SteuererklaerungBearbeiten" targetRef="Task_ErklaerungUebermitteln" name=""/>
+    <bpmn:sequenceFlow id="Flow_Uebermitteln_FinanzamtBearbeiten" sourceRef="Task_ErklaerungUebermitteln" targetRef="Task_SteuerbescheidBearbeiten" name="Finanzamt"/>
+    <bpmn:sequenceFlow id="Flow_FinanzamtBearbeiten_BescheidErhalten" sourceRef="Task_SteuerbescheidBearbeiten" targetRef="Event_SteuerbescheidErhalten" name=""/>
+    <bpmn:sequenceFlow id="Flow_BescheidErhalten_BescheidPruefen" sourceRef="Event_SteuerbescheidErhalten" targetRef="Task_SteuerbescheidPruefen" name=""/>
+    <bpmn:sequenceFlow id="Flow_BescheidPruefen_GatewayParallel" sourceRef="Task_SteuerbescheidPruefen" targetRef="Gateway_Parallel_SendenArchivieren" name=""/>
+    <bpmn:sequenceFlow id="Flow_GatewayParallel_Senden" sourceRef="Gateway_Parallel_SendenArchivieren" targetRef="Task_BescheidAnMandantSenden" name=""/>
+    <bpmn:sequenceFlow id="Flow_Senden_Ablegen" sourceRef="Task_BescheidAnMandantSenden" targetRef="Task_BescheidInOrdnerAblegen" name=""/>
+    <bpmn:sequenceFlow id="Flow_Ablegen_GatewayParallelEnde" sourceRef="Task_BescheidInOrdnerAblegen" targetRef="Gateway_Parallel_SendenArchivierenEnde" name=""/>
+    <bpmn:sequenceFlow id="Flow_GatewayParallel_Archivieren" sourceRef="Gateway_Parallel_SendenArchivieren" targetRef="Task_BescheidArchivieren" name=""/>
+    <bpmn:sequenceFlow id="Flow_Archivieren_GatewayParallelEnde" sourceRef="Task_BescheidArchivieren" targetRef="Gateway_Parallel_SendenArchivierenEnde" name=""/>
+    <bpmn:sequenceFlow id="Flow_GatewayParallelEnde_EndEvent" sourceRef="Gateway_Parallel_SendenArchivierenEnde" targetRef="EndEvent_ProzessBeendet" name=""/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Steuerkanzlei_Process">
+      <bpmndi:BPMNShape id="StartEvent_Mandant_di" bpmnElement="StartEvent_Mandant">
+        <dc:Bounds x="150" y="102" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="140" y="143" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_UnterlagenZusammenstellen_di" bpmnElement="Task_UnterlagenZusammenstellen">
+        <dc:Bounds x="236" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_UnterlagenPruefen_di" bpmnElement="Task_UnterlagenPruefen">
+        <dc:Bounds x="386" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_UnterlagenVollstaendig_di" bpmnElement="Gateway_UnterlagenVollstaendig">
+        <dc:Bounds x="536" y="95" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="526" y="150" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_MandantKontaktieren_di" bpmnElement="Task_MandantKontaktieren">
+        <dc:Bounds x="636" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_FehlendeUnterlagenBereitstellen_di" bpmnElement="Task_FehlendeUnterlagenBereitstellen">
+        <dc:Bounds x="786" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_FallWeiterleiten_di" bpmnElement="Task_FallWeiterleiten">
+        <dc:Bounds x="936" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_UnterlagenEinarbeiten_di" bpmnElement="Task_UnterlagenEinarbeiten">
+        <dc:Bounds x="1086" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Rueckfragen_di" bpmnElement="Gateway_Rueckfragen">
+        <dc:Bounds x="1236" y="95" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1226" y="150" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_RueckfragenKlaeren_di" bpmnElement="Task_RueckfragenKlaeren">
+        <dc:Bounds x="1336" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_EinarbeitungBeendet_di" bpmnElement="Gateway_EinarbeitungBeendet">
+        <dc:Bounds x="1486" y="95" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1476" y="150" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SteuererklaerungBearbeiten_di" bpmnElement="Task_SteuererklaerungBearbeiten">
+        <dc:Bounds x="1586" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_ErklaerungUebermitteln_di" bpmnElement="Task_ErklaerungUebermitteln">
+        <dc:Bounds x="1736" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SteuerbescheidBearbeiten_di" bpmnElement="Task_SteuerbescheidBearbeiten">
+        <dc:Bounds x="1886" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_SteuerbescheidErhalten_di" bpmnElement="Event_SteuerbescheidErhalten">
+        <dc:Bounds x="2036" y="102" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2026" y="143" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_SteuerbescheidPruefen_di" bpmnElement="Task_SteuerbescheidPruefen">
+        <dc:Bounds x="2122" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Parallel_SendenArchivieren_di" bpmnElement="Gateway_Parallel_SendenArchivieren">
+        <dc:Bounds x="2272" y="95" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2262" y="150" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_BescheidAnMandantSenden_di" bpmnElement="Task_BescheidAnMandantSenden">
+        <dc:Bounds x="2372" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_BescheidInOrdnerAblegen_di" bpmnElement="Task_BescheidInOrdnerAblegen">
+        <dc:Bounds x="2522" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_BescheidArchivieren_di" bpmnElement="Task_BescheidArchivieren">
+        <dc:Bounds x="2672" y="80" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Parallel_SendenArchivierenEnde_di" bpmnElement="Gateway_Parallel_SendenArchivierenEnde">
+        <dc:Bounds x="2822" y="95" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2812" y="150" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_ProzessBeendet_di" bpmnElement="EndEvent_ProzessBeendet">
+        <dc:Bounds x="2922" y="102" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2912" y="143" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_Zusammenstellen_di" bpmnElement="Flow_Start_Zusammenstellen">
+        <di:waypoint x="186" y="120"/>
+        <di:waypoint x="236" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Zusammenstellen_Pruefen_di" bpmnElement="Flow_Zusammenstellen_Pruefen">
+        <di:waypoint x="336" y="120"/>
+        <di:waypoint x="386" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Pruefen_GatewayVollstaendig_di" bpmnElement="Flow_Pruefen_GatewayVollstaendig">
+        <di:waypoint x="486" y="120"/>
+        <di:waypoint x="536" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayVollstaendig_Nein_di" bpmnElement="Flow_GatewayVollstaendig_Nein">
+        <di:waypoint x="586" y="120"/>
+        <di:waypoint x="636" y="120"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="611" y="105" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Kontaktieren_Bereitstellen_di" bpmnElement="Flow_Kontaktieren_Bereitstellen">
+        <di:waypoint x="736" y="120"/>
+        <di:waypoint x="786" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Bereitstellen_Weiterleiten_Fehlend_di" bpmnElement="Flow_Bereitstellen_Weiterleiten_Fehlend">
+        <di:waypoint x="886" y="120"/>
+        <di:waypoint x="936" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayVollstaendig_Ja_di" bpmnElement="Flow_GatewayVollstaendig_Ja">
+        <di:waypoint x="586" y="120"/>
+        <di:waypoint x="936" y="120"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="761" y="105" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Weiterleiten_Einarbeiten_di" bpmnElement="Flow_Weiterleiten_Einarbeiten">
+        <di:waypoint x="1036" y="120"/>
+        <di:waypoint x="1086" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Einarbeiten_GatewayRueckfragen_di" bpmnElement="Flow_Einarbeiten_GatewayRueckfragen">
+        <di:waypoint x="1186" y="120"/>
+        <di:waypoint x="1236" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayRueckfragen_Ja_di" bpmnElement="Flow_GatewayRueckfragen_Ja">
+        <di:waypoint x="1286" y="120"/>
+        <di:waypoint x="1336" y="120"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1311" y="105" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayRueckfragen_Nein_di" bpmnElement="Flow_GatewayRueckfragen_Nein">
+        <di:waypoint x="1286" y="120"/>
+        <di:waypoint x="1586" y="120"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1436" y="105" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RueckfragenKlaeren_GatewayEinarbeitungBeendet_di" bpmnElement="Flow_RueckfragenKlaeren_GatewayEinarbeitungBeendet">
+        <di:waypoint x="1436" y="120"/>
+        <di:waypoint x="1486" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayEinarbeitungBeendet_Nein_di" bpmnElement="Flow_GatewayEinarbeitungBeendet_Nein">
+        <di:waypoint x="1536" y="120"/>
+        <di:waypoint x="1086" y="120"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1311" y="105" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayEinarbeitungBeendet_Ja_di" bpmnElement="Flow_GatewayEinarbeitungBeendet_Ja">
+        <di:waypoint x="1536" y="120"/>
+        <di:waypoint x="1586" y="120"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1561" y="105" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Bearbeiten_Uebermitteln_di" bpmnElement="Flow_Bearbeiten_Uebermitteln">
+        <di:waypoint x="1686" y="120"/>
+        <di:waypoint x="1736" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Uebermitteln_FinanzamtBearbeiten_di" bpmnElement="Flow_Uebermitteln_FinanzamtBearbeiten">
+        <di:waypoint x="1836" y="120"/>
+        <di:waypoint x="1886" y="120"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1861" y="105" width="60" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FinanzamtBearbeiten_BescheidErhalten_di" bpmnElement="Flow_FinanzamtBearbeiten_BescheidErhalten">
+        <di:waypoint x="1986" y="120"/>
+        <di:waypoint x="2036" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_BescheidErhalten_BescheidPruefen_di" bpmnElement="Flow_BescheidErhalten_BescheidPruefen">
+        <di:waypoint x="2072" y="120"/>
+        <di:waypoint x="2122" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_BescheidPruefen_GatewayParallel_di" bpmnElement="Flow_BescheidPruefen_GatewayParallel">
+        <di:waypoint x="2222" y="120"/>
+        <di:waypoint x="2272" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayParallel_Senden_di" bpmnElement="Flow_GatewayParallel_Senden">
+        <di:waypoint x="2322" y="120"/>
+        <di:waypoint x="2372" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Senden_Ablegen_di" bpmnElement="Flow_Senden_Ablegen">
+        <di:waypoint x="2472" y="120"/>
+        <di:waypoint x="2522" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Ablegen_GatewayParallelEnde_di" bpmnElement="Flow_Ablegen_GatewayParallelEnde">
+        <di:waypoint x="2622" y="120"/>
+        <di:waypoint x="2822" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayParallel_Archivieren_di" bpmnElement="Flow_GatewayParallel_Archivieren">
+        <di:waypoint x="2322" y="120"/>
+        <di:waypoint x="2672" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Archivieren_GatewayParallelEnde_di" bpmnElement="Flow_Archivieren_GatewayParallelEnde">
+        <di:waypoint x="2772" y="120"/>
+        <di:waypoint x="2822" y="120"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_GatewayParallelEnde_EndEvent_di" bpmnElement="Flow_GatewayParallelEnde_EndEvent">
+        <di:waypoint x="2872" y="120"/>
+        <di:waypoint x="2922" y="120"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
