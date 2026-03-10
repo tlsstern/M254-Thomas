@@ -169,9 +169,9 @@
         <dc:Bounds x="180" y="480" width="3570" height="240"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_Mandant_di" bpmnElement="StartEvent_Mandant">
-        <dc:Bounds x="250" y="152" width="36" height="36"/>
+        <dc:Bounds x="282" y="152" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="240" y="193" width="60" height="14"/>
+          <dc:Bounds x="272" y="193" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_UnterlagenZusammenstellen_di" bpmnElement="Task_UnterlagenZusammenstellen">
@@ -181,9 +181,9 @@
         <dc:Bounds x="610" y="270" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_UnterlagenVollstaendig_di" bpmnElement="Gateway_UnterlagenVollstaendig">
-        <dc:Bounds x="790" y="285" width="50" height="50"/>
+        <dc:Bounds x="815" y="285" width="50" height="50"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="780" y="340" width="60" height="14"/>
+          <dc:Bounds x="805" y="340" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_MandantKontaktieren_di" bpmnElement="Task_MandantKontaktieren">
@@ -199,18 +199,18 @@
         <dc:Bounds x="1150" y="510" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Rueckfragen_di" bpmnElement="Gateway_Rueckfragen">
-        <dc:Bounds x="1330" y="525" width="50" height="50"/>
+        <dc:Bounds x="1355" y="525" width="50" height="50"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1320" y="580" width="60" height="14"/>
+          <dc:Bounds x="1345" y="580" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_RueckfragenKlaeren_di" bpmnElement="Task_RueckfragenKlaeren">
         <dc:Bounds x="1510" y="270" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_EinarbeitungBeendet_di" bpmnElement="Gateway_EinarbeitungBeendet">
-        <dc:Bounds x="1690" y="525" width="50" height="50"/>
+        <dc:Bounds x="1715" y="525" width="50" height="50"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1680" y="580" width="60" height="14"/>
+          <dc:Bounds x="1705" y="580" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_SteuererklaerungBearbeiten_di" bpmnElement="Task_SteuererklaerungBearbeiten">
@@ -223,18 +223,18 @@
         <dc:Bounds x="2230" y="510" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_SteuerbescheidErhalten_di" bpmnElement="Event_SteuerbescheidErhalten">
-        <dc:Bounds x="2410" y="532" width="36" height="36"/>
+        <dc:Bounds x="2442" y="532" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2400" y="573" width="60" height="14"/>
+          <dc:Bounds x="2432" y="573" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_SteuerbescheidPruefen_di" bpmnElement="Task_SteuerbescheidPruefen">
         <dc:Bounds x="2590" y="510" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Parallel_SendenArchivieren_di" bpmnElement="Gateway_Parallel_SendenArchivieren">
-        <dc:Bounds x="2770" y="525" width="50" height="50"/>
+        <dc:Bounds x="2795" y="525" width="50" height="50"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2760" y="580" width="60" height="14"/>
+          <dc:Bounds x="2785" y="580" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Task_BescheidAnMandantSenden_di" bpmnElement="Task_BescheidAnMandantSenden">
@@ -247,19 +247,19 @@
         <dc:Bounds x="3130" y="130" width="100" height="80"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Parallel_SendenArchivierenEnde_di" bpmnElement="Gateway_Parallel_SendenArchivierenEnde">
-        <dc:Bounds x="3310" y="525" width="50" height="50"/>
+        <dc:Bounds x="3335" y="525" width="50" height="50"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3300" y="580" width="60" height="14"/>
+          <dc:Bounds x="3325" y="580" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_ProzessBeendet_di" bpmnElement="EndEvent_ProzessBeendet">
-        <dc:Bounds x="3490" y="532" width="36" height="36"/>
+        <dc:Bounds x="3522" y="532" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3480" y="573" width="60" height="14"/>
+          <dc:Bounds x="3512" y="573" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_Start_Zusammenstellen_di" bpmnElement="Flow_Start_Zusammenstellen">
-        <di:waypoint x="286" y="170"/>
+        <di:waypoint x="318" y="170"/>
         <di:waypoint x="430" y="170"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Zusammenstellen_Pruefen_di" bpmnElement="Flow_Zusammenstellen_Pruefen">
@@ -270,13 +270,13 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Pruefen_GatewayVollstaendig_di" bpmnElement="Flow_Pruefen_GatewayVollstaendig">
         <di:waypoint x="710" y="310"/>
-        <di:waypoint x="790" y="310"/>
+        <di:waypoint x="815" y="310"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayVollstaendig_Nein_di" bpmnElement="Flow_GatewayVollstaendig_Nein">
-        <di:waypoint x="840" y="310"/>
+        <di:waypoint x="865" y="310"/>
         <di:waypoint x="970" y="310"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="895" y="295" width="60" height="14"/>
+          <dc:Bounds x="907" y="295" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Kontaktieren_Bereitstellen_di" bpmnElement="Flow_Kontaktieren_Bereitstellen">
@@ -287,17 +287,18 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Bereitstellen_Pruefen_di" bpmnElement="Flow_Bereitstellen_Pruefen">
         <di:waypoint x="1250" y="170"/>
-        <di:waypoint x="930" y="170"/>
-        <di:waypoint x="930" y="310"/>
+        <di:waypoint x="1250" y="230"/>
+        <di:waypoint x="580" y="230"/>
+        <di:waypoint x="580" y="310"/>
         <di:waypoint x="610" y="310"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayVollstaendig_Ja_di" bpmnElement="Flow_GatewayVollstaendig_Ja">
-        <di:waypoint x="840" y="310"/>
-        <di:waypoint x="905" y="310"/>
-        <di:waypoint x="905" y="410"/>
+        <di:waypoint x="865" y="310"/>
+        <di:waypoint x="917" y="310"/>
+        <di:waypoint x="917" y="410"/>
         <di:waypoint x="970" y="410"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="895" y="345" width="60" height="14"/>
+          <dc:Bounds x="907" y="345" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Weiterleiten_Einarbeiten_di" bpmnElement="Flow_Weiterleiten_Einarbeiten">
@@ -308,42 +309,45 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Einarbeiten_GatewayRueckfragen_di" bpmnElement="Flow_Einarbeiten_GatewayRueckfragen">
         <di:waypoint x="1250" y="550"/>
-        <di:waypoint x="1330" y="550"/>
+        <di:waypoint x="1355" y="550"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayRueckfragen_Ja_di" bpmnElement="Flow_GatewayRueckfragen_Ja">
-        <di:waypoint x="1380" y="550"/>
-        <di:waypoint x="1445" y="550"/>
-        <di:waypoint x="1445" y="310"/>
+        <di:waypoint x="1405" y="550"/>
+        <di:waypoint x="1457" y="550"/>
+        <di:waypoint x="1457" y="310"/>
         <di:waypoint x="1510" y="310"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1435" y="415" width="60" height="14"/>
+          <dc:Bounds x="1447" y="415" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayRueckfragen_Nein_di" bpmnElement="Flow_GatewayRueckfragen_Nein">
-        <di:waypoint x="1380" y="550"/>
+        <di:waypoint x="1405" y="550"/>
         <di:waypoint x="1870" y="550"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1615" y="535" width="60" height="14"/>
+          <dc:Bounds x="1627" y="535" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_RueckfragenKlaeren_GatewayEinarbeitungBeendet_di" bpmnElement="Flow_RueckfragenKlaeren_GatewayEinarbeitungBeendet">
         <di:waypoint x="1610" y="310"/>
-        <di:waypoint x="1650" y="310"/>
-        <di:waypoint x="1650" y="550"/>
-        <di:waypoint x="1690" y="550"/>
+        <di:waypoint x="1662" y="310"/>
+        <di:waypoint x="1662" y="550"/>
+        <di:waypoint x="1715" y="550"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayEinarbeitungBeendet_Nein_di" bpmnElement="Flow_GatewayEinarbeitungBeendet_Nein">
-        <di:waypoint x="1740" y="550"/>
+        <di:waypoint x="1765" y="550"/>
+        <di:waypoint x="1765" y="610"/>
+        <di:waypoint x="1120" y="610"/>
+        <di:waypoint x="1120" y="550"/>
         <di:waypoint x="1150" y="550"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1435" y="535" width="60" height="14"/>
+          <dc:Bounds x="1447" y="535" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayEinarbeitungBeendet_Ja_di" bpmnElement="Flow_GatewayEinarbeitungBeendet_Ja">
-        <di:waypoint x="1740" y="550"/>
+        <di:waypoint x="1765" y="550"/>
         <di:waypoint x="1870" y="550"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1795" y="535" width="60" height="14"/>
+          <dc:Bounds x="1807" y="535" width="60" height="14"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Bearbeiten_Uebermitteln_di" bpmnElement="Flow_Bearbeiten_Uebermitteln">
@@ -359,18 +363,18 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_FinanzamtBearbeiten_BescheidErhalten_di" bpmnElement="Flow_FinanzamtBearbeiten_BescheidErhalten">
         <di:waypoint x="2330" y="550"/>
-        <di:waypoint x="2410" y="550"/>
+        <di:waypoint x="2442" y="550"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_BescheidErhalten_BescheidPruefen_di" bpmnElement="Flow_BescheidErhalten_BescheidPruefen">
-        <di:waypoint x="2446" y="550"/>
+        <di:waypoint x="2478" y="550"/>
         <di:waypoint x="2590" y="550"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_BescheidPruefen_GatewayParallel_di" bpmnElement="Flow_BescheidPruefen_GatewayParallel">
         <di:waypoint x="2690" y="550"/>
-        <di:waypoint x="2770" y="550"/>
+        <di:waypoint x="2795" y="550"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayParallel_Senden_di" bpmnElement="Flow_GatewayParallel_Senden">
-        <di:waypoint x="2820" y="550"/>
+        <di:waypoint x="2845" y="550"/>
         <di:waypoint x="2950" y="550"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Senden_Ablegen_di" bpmnElement="Flow_Senden_Ablegen">
@@ -381,25 +385,25 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Ablegen_GatewayParallelEnde_di" bpmnElement="Flow_Ablegen_GatewayParallelEnde">
         <di:waypoint x="3230" y="170"/>
-        <di:waypoint x="3270" y="170"/>
-        <di:waypoint x="3270" y="550"/>
-        <di:waypoint x="3310" y="550"/>
+        <di:waypoint x="3282" y="170"/>
+        <di:waypoint x="3282" y="550"/>
+        <di:waypoint x="3335" y="550"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayParallel_Archivieren_di" bpmnElement="Flow_GatewayParallel_Archivieren">
-        <di:waypoint x="2820" y="550"/>
-        <di:waypoint x="2885" y="550"/>
-        <di:waypoint x="2885" y="650"/>
+        <di:waypoint x="2845" y="550"/>
+        <di:waypoint x="2897" y="550"/>
+        <di:waypoint x="2897" y="650"/>
         <di:waypoint x="2950" y="650"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Archivieren_GatewayParallelEnde_di" bpmnElement="Flow_Archivieren_GatewayParallelEnde">
         <di:waypoint x="3050" y="650"/>
-        <di:waypoint x="3180" y="650"/>
-        <di:waypoint x="3180" y="550"/>
-        <di:waypoint x="3310" y="550"/>
+        <di:waypoint x="3192" y="650"/>
+        <di:waypoint x="3192" y="550"/>
+        <di:waypoint x="3335" y="550"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_GatewayParallelEnde_EndEvent_di" bpmnElement="Flow_GatewayParallelEnde_EndEvent">
-        <di:waypoint x="3360" y="550"/>
-        <di:waypoint x="3490" y="550"/>
+        <di:waypoint x="3385" y="550"/>
+        <di:waypoint x="3522" y="550"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

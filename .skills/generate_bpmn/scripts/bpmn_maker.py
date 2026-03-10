@@ -219,8 +219,8 @@ def generate_bpmn(input_json_path, output_bpmn_path):
             offset = row_offsets.get(node_id, 0)
             l_cfg = lane_configs.get(lane_id, lane_configs["default"])
             
-            node_x = base_x + (d * x_spacing)
-            # Center it vertically in the lane, plus offset if stacked
+            column_center = base_x + (d * x_spacing) + 50
+            node_x = column_center - (width / 2)
             node_y = l_cfg["y"] + 20 + (offset * y_node_spacing) + ( (y_node_spacing - height) / 2 )
 
         layout_info[node_id] = {
@@ -296,8 +296,13 @@ def generate_bpmn(input_json_path, output_bpmn_path):
                 "y": str(int(start_y))
             })
             
-            # Simple orthogonal routing
-            if abs(start_y - end_y) > 10 and source_ref != target_ref:
+            if start_x >= end_x and source_ref != target_ref:
+                # Loop back routing - route down below the tasks and back
+                ET.SubElement(edge_di, "{http://www.omg.org/spec/DD/20100524/DI}waypoint", {"x": str(int(start_x)), "y": str(int(start_y + 60))})
+                ET.SubElement(edge_di, "{http://www.omg.org/spec/DD/20100524/DI}waypoint", {"x": str(int(end_x - 30)), "y": str(int(start_y + 60))})
+                ET.SubElement(edge_di, "{http://www.omg.org/spec/DD/20100524/DI}waypoint", {"x": str(int(end_x - 30)), "y": str(int(end_y))})
+            elif abs(start_y - end_y) > 10 and source_ref != target_ref:
+                # Forward orthogonal routing
                 mid_x = start_x + (end_x - start_x) / 2
                 ET.SubElement(edge_di, "{http://www.omg.org/spec/DD/20100524/DI}waypoint", {"x": str(int(mid_x)), "y": str(int(start_y))})
                 ET.SubElement(edge_di, "{http://www.omg.org/spec/DD/20100524/DI}waypoint", {"x": str(int(mid_x)), "y": str(int(end_y))})
