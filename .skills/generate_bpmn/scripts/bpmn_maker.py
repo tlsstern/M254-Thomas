@@ -26,19 +26,45 @@ def generate_bpmn(input_json_path, output_bpmn_path):
         "id": "Definitions_1",
         "targetNamespace": "http://bpmn.io/schema/bpmn",
         "exporter": "python-bpmn-maker",
-        "exporterVersion": "1.0"
+        "exporterVersion": "2.0"
     })
     
+    # Check if we have lanes for a Collaboration diagram
+    lanes_data = data.get("lanes", [])
+    has_lanes = len(lanes_data) > 0
+    participant_id = f"Participant_{process_id}"
+
+    if has_lanes:
+        collaboration = ET.SubElement(root, "{http://www.omg.org/spec/BPMN/20100524/MODEL}collaboration", {"id": "Collaboration_1"})
+        ET.SubElement(collaboration, "{http://www.omg.org/spec/BPMN/20100524/MODEL}participant", {
+            "id": participant_id,
+            "name": process_name,
+            "processRef": process_id
+        })
+
     process = ET.SubElement(root, "{http://www.omg.org/spec/BPMN/20100524/MODEL}process", {
         "id": process_id,
         "name": process_name,
         "isExecutable": is_executable
     })
     
+    lane_set = None
+    if has_lanes:
+        lane_set = ET.SubElement(process, "{http://www.omg.org/spec/BPMN/20100524/MODEL}laneSet", {"id": f"LaneSet_{process_id}"})
+        for lane in lanes_data:
+            l_elem = ET.SubElement(lane_set, "{http://www.omg.org/spec/BPMN/20100524/MODEL}lane", {
+                "id": lane["id"],
+                "name": lane.get("name", lane["id"])
+            })
+            lane["_element"] = l_elem
+
     diagram = ET.SubElement(root, "{http://www.omg.org/spec/BPMN/20100524/DI}BPMNDiagram", {"id": "BPMNDiagram_1"})
+    
+    # The BPMNPlane references the Collaboration if it exists, otherwise the Process
+    plane_bpmn_element = "Collaboration_1" if has_lanes else process_id
     plane = ET.SubElement(diagram, "{http://www.omg.org/spec/BPMN/20100524/DI}BPMNPlane", {
         "id": "BPMNPlane_1",
-        "bpmnElement": process_id
+        "bpmnElement": plane_bpmn_element
     })
 
     nodes = data.get("nodes", [])
@@ -61,7 +87,7 @@ def generate_bpmn(input_json_path, output_bpmn_path):
             incoming[target].append(source)
             incoming_edges[target].append(edge_id)
 
-    # 2. Simple layout logic (longest path depth for X, simple index for Y)
+    # 2. X-axis Depth calculation
     depths = {n["id"]: 0 for n in nodes}
     start_nodes = [n["id"] for n in nodes if not incoming[n["id"]]]
     if not start_nodes and nodes:
@@ -79,17 +105,81 @@ def generate_bpmn(input_json_path, output_bpmn_path):
     for start in start_nodes:
         dfs_depth(start, 0, set())
 
-    # Group by depth for Y positioning
-    depth_groups = {}
-    for n_id, d in depths.items():
-        if d not in depth_groups:
-            depth_groups[d] = []
-        depth_groups[d].append(n_id)
+    # Resolve parallel overlaps at same depth within the same lane
+    lane_depth_counts = {}
+    row_offsets = {n["id"]: 0 for n in nodes}
+    
+    for n in nodes:
+        n_id = n["id"]
+        n_lane = n.get("lane", "default")
+        n_depth = depths[n_id]
+        key = f"{n_lane}_{n_depth}"
+        count = lane_depth_counts.get(key, 0)
+        row_offsets[n_id] = count
+        lane_depth_counts[key] = count + 1
 
-    rows = {}
-    for d, group in depth_groups.items():
-        for idx, n_id in enumerate(group):
-            rows[n_id] = idx
+    # Constants
+    x_spacing = 180
+    y_node_spacing = 100
+    base_x = 250
+    lane_width_base = max(depths.values(), default=0) * x_spacing + x_spacing * 2 if depths else 800
+
+    # Y-axis calculation
+    lane_configs = {}
+    current_y = 100
+    pool_y = 100
+    
+    if has_lanes:
+        # Fallback default lane if missing
+        lane_configs["default"] = {"y": 100, "height": 300, "center_y": 250}
+        for lane in lanes_data:
+            lane_id = lane["id"]
+            # Find max nodes stacked vertically in this lane
+            max_stacked = 1
+            for key, count in lane_depth_counts.items():
+                if key.startswith(f"{lane_id}_") and count > max_stacked:
+                    max_stacked = count
+            
+            lane_height = max_stacked * y_node_spacing + 40
+            lane_configs[lane_id] = {
+                "y": current_y,
+                "height": lane_height,
+                "center_y": current_y + (lane_height / 2)
+            }
+            current_y += lane_height
+    else:
+        lane_configs["default"] = {"y": 100, "height": 300, "center_y": 250}
+
+    total_pool_height = current_y - pool_y if current_y > pool_y else 300
+
+    # Draw Pool (Participant) and Lanes
+    if has_lanes:
+        pool_shape = ET.SubElement(plane, "{http://www.omg.org/spec/BPMN/20100524/DI}BPMNShape", {
+            "id": f"{participant_id}_di",
+            "bpmnElement": participant_id,
+            "isHorizontal": "true"
+        })
+        ET.SubElement(pool_shape, "{http://www.omg.org/spec/DD/20100524/DC}Bounds", {
+            "x": "150",
+            "y": str(pool_y),
+            "width": str(lane_width_base),
+            "height": str(total_pool_height)
+        })
+        
+        for lane in lanes_data:
+            lane_id = lane["id"]
+            l_cfg = lane_configs[lane_id]
+            lane_shape = ET.SubElement(plane, "{http://www.omg.org/spec/BPMN/20100524/DI}BPMNShape", {
+                "id": f"{lane_id}_di",
+                "bpmnElement": lane_id,
+                "isHorizontal": "true"
+            })
+            ET.SubElement(lane_shape, "{http://www.omg.org/spec/DD/20100524/DC}Bounds", {
+                "x": "180",
+                "y": str(l_cfg["y"]),
+                "width": str(lane_width_base - 30),
+                "height": str(l_cfg["height"])
+            })
 
     layout_info = {}
     type_info = {
@@ -106,26 +196,32 @@ def generate_bpmn(input_json_path, output_bpmn_path):
         "IntermediateThrowEvent": ("intermediateThrowEvent", 36, 36)
     }
 
-    x_spacing = 180
-    y_spacing = 120
-    base_x = 150
-    base_y = 120
-
+    # 3. Add Nodes
     for node in nodes:
         node_id = node.get("id")
         node_type = node.get("type", "Task")
         node_name = node.get("name", "")
+        lane_id = node.get("lane", "default")
         bpmn_tag, width, height = type_info.get(node_type, ("task", 100, 80))
 
-        # Check for explicitly provided coordinates, else use auto-layout
+        # Register node in lane XML if lanes exist
+        if has_lanes and lane_id != "default":
+            for l_data in lanes_data:
+                if l_data["id"] == lane_id:
+                    ET.SubElement(l_data["_element"], "{http://www.omg.org/spec/BPMN/20100524/MODEL}flowNodeRef").text = node_id
+                    break
+
         if "x" in node and "y" in node:
             node_x = node["x"]
             node_y = node["y"]
         else:
             d = depths.get(node_id, 0)
-            r = rows.get(node_id, 0)
+            offset = row_offsets.get(node_id, 0)
+            l_cfg = lane_configs.get(lane_id, lane_configs["default"])
+            
             node_x = base_x + (d * x_spacing)
-            node_y = base_y + (r * y_spacing)
+            # Center it vertically in the lane, plus offset if stacked
+            node_y = l_cfg["y"] + 20 + (offset * y_node_spacing) + ( (y_node_spacing - height) / 2 )
 
         layout_info[node_id] = {
             "x": node_x,
@@ -135,7 +231,9 @@ def generate_bpmn(input_json_path, output_bpmn_path):
             "center_x": node_x + width / 2,
             "center_y": node_y + height / 2,
             "right_x": node_x + width,
-            "left_x": node_x
+            "left_x": node_x,
+            "top_y": node_y,
+            "bottom_y": node_y + height
         }
 
         elem = ET.SubElement(process, f"{{http://www.omg.org/spec/BPMN/20100524/MODEL}}{bpmn_tag}", {
@@ -155,6 +253,7 @@ def generate_bpmn(input_json_path, output_bpmn_path):
             "height": str(int(height))
         })
 
+        # Gateway/Event labels
         if bpmn_tag.endswith("Event") or bpmn_tag.endswith("Gateway"):
             label = ET.SubElement(shape, "{http://www.omg.org/spec/BPMN/20100524/DI}BPMNLabel")
             ET.SubElement(label, "{http://www.omg.org/spec/DD/20100524/DC}Bounds", {
@@ -164,6 +263,7 @@ def generate_bpmn(input_json_path, output_bpmn_path):
                 "height": "14"
             })
 
+    # 4. Add Edges
     for edge in edges:
         edge_id = edge.get("id")
         source_ref = edge.get("source")
@@ -196,7 +296,7 @@ def generate_bpmn(input_json_path, output_bpmn_path):
                 "y": str(int(start_y))
             })
             
-            # Add orthogonal waypoints if Y coordinates differ significantly
+            # Simple orthogonal routing
             if abs(start_y - end_y) > 10 and source_ref != target_ref:
                 mid_x = start_x + (end_x - start_x) / 2
                 ET.SubElement(edge_di, "{http://www.omg.org/spec/DD/20100524/DI}waypoint", {"x": str(int(mid_x)), "y": str(int(start_y))})
