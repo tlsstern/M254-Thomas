@@ -1,0 +1,65 @@
+{
+  "process_id": "Krankenversicherung_Process",
+  "name": "Krankenversicherung (#66)",
+  "lanes": [
+    {"id": "Lane_Sachbearbeitung", "name": "Krankenversicherung"}
+  ],
+  "nodes": [
+    {"id": "StartEvent_1", "type": "MessageStartEvent", "name": "Abrechnung eingetroffen", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Task_Pruefen", "type": "Task", "name": "Vollständigkeit der Belege prüfen", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Gateway_Vollstaendig", "type": "ExclusiveGateway", "name": "Belege vollständig?", "lane": "Lane_Sachbearbeitung"},
+    
+    {"id": "Gateway_Split", "type": "ParallelGateway", "name": "Unvollständig", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Task_Anfordern", "type": "SendTask", "name": "Fehlende Belege anfordern", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Event_BelegeErhalten", "type": "IntermediateCatchEvent", "name": "Belege erhalten", "lane": "Lane_Sachbearbeitung", "event_definition": {"type": "message"}},
+    {"id": "Task_Ablegen", "type": "Task", "name": "Erhaltene Belege ablegen", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Gateway_Join", "type": "ParallelGateway", "name": "", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Task_Zusammenstellen", "type": "Task", "name": "Belege zusammenstellen", "lane": "Lane_Sachbearbeitung"},
+
+    {"id": "Task_ErstattungPruefen", "type": "Task", "name": "Erstattungsbetrag prüfen", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Gateway_Erstattung", "type": "ExclusiveGateway", "name": "Erstattung?", "lane": "Lane_Sachbearbeitung"},
+    
+    {"id": "Task_InformierenAblehnung", "type": "SendTask", "name": "Kunden informieren (Ablehnung)", "lane": "Lane_Sachbearbeitung"},
+    {"id": "EndEvent_Ablehnung", "type": "EndEvent", "name": "Prozess beendet", "lane": "Lane_Sachbearbeitung"},
+
+    {"id": "Task_InformierenTeilweise", "type": "SendTask", "name": "Kunden informieren (Teilweise)", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Gateway_Reaction", "type": "EventBasedGateway", "name": "Reaktion?", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Event_10Tage", "type": "IntermediateCatchEvent", "name": "10 Tage vergangen", "lane": "Lane_Sachbearbeitung", "event_definition": {"type": "timer", "duration": "P10D"}},
+    {"id": "EndEvent_Terminiert", "type": "EndEvent", "name": "Prozess terminiert", "lane": "Lane_Sachbearbeitung", "event_definition": {"type": "terminate"}},
+    {"id": "Event_PositiveReaktion", "type": "IntermediateCatchEvent", "name": "Positive Reaktion", "lane": "Lane_Sachbearbeitung", "event_definition": {"type": "message"}},
+
+    {"id": "Task_Erstatten", "type": "Task", "name": "Erstattung durchführen", "lane": "Lane_Sachbearbeitung"},
+    {"id": "Task_InformierenErstattung", "type": "SendTask", "name": "Kunden über Erstattung informieren", "lane": "Lane_Sachbearbeitung"},
+    {"id": "EndEvent_Erstattet", "type": "EndEvent", "name": "Prozess beendet", "lane": "Lane_Sachbearbeitung"}
+  ],
+  "edges": [
+    {"id": "Flow_1", "source": "StartEvent_1", "target": "Task_Pruefen"},
+    {"id": "Flow_2", "source": "Task_Pruefen", "target": "Gateway_Vollstaendig"},
+    
+    {"id": "Flow_Nein", "source": "Gateway_Vollstaendig", "target": "Gateway_Split", "name": "Nein"},
+    {"id": "Flow_Split1", "source": "Gateway_Split", "target": "Task_Anfordern"},
+    {"id": "Flow_Split1a", "source": "Task_Anfordern", "target": "Event_BelegeErhalten"},
+    {"id": "Flow_Split1b", "source": "Event_BelegeErhalten", "target": "Gateway_Join"},
+    {"id": "Flow_Split2", "source": "Gateway_Split", "target": "Task_Ablegen"},
+    {"id": "Flow_Split2a", "source": "Task_Ablegen", "target": "Gateway_Join"},
+    {"id": "Flow_Join", "source": "Gateway_Join", "target": "Task_Zusammenstellen"},
+    {"id": "Flow_Loop", "source": "Task_Zusammenstellen", "target": "Task_Pruefen"},
+
+    {"id": "Flow_Ja", "source": "Gateway_Vollstaendig", "target": "Task_ErstattungPruefen", "name": "Ja"},
+    {"id": "Flow_3", "source": "Task_ErstattungPruefen", "target": "Gateway_Erstattung"},
+    
+    {"id": "Flow_GarNicht", "source": "Gateway_Erstattung", "target": "Task_InformierenAblehnung", "name": "Gar nicht"},
+    {"id": "Flow_4", "source": "Task_InformierenAblehnung", "target": "EndEvent_Ablehnung"},
+
+    {"id": "Flow_Teilweise", "source": "Gateway_Erstattung", "target": "Task_InformierenTeilweise", "name": "Teilweise"},
+    {"id": "Flow_5", "source": "Task_InformierenTeilweise", "target": "Gateway_Reaction"},
+    {"id": "Flow_EBG_1", "source": "Gateway_Reaction", "target": "Event_10Tage"},
+    {"id": "Flow_EBG_2", "source": "Gateway_Reaction", "target": "Event_PositiveReaktion"},
+    {"id": "Flow_6", "source": "Event_10Tage", "target": "EndEvent_Terminiert"},
+    {"id": "Flow_7", "source": "Event_PositiveReaktion", "target": "Task_Erstatten"},
+
+    {"id": "Flow_Komplett", "source": "Gateway_Erstattung", "target": "Task_Erstatten", "name": "Komplett/Ganz"},
+    {"id": "Flow_8", "source": "Task_Erstatten", "target": "Task_InformierenErstattung"},
+    {"id": "Flow_9", "source": "Task_InformierenErstattung", "target": "EndEvent_Erstattet"}
+  ]
+}
