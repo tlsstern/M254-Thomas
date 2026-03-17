@@ -1,0 +1,110 @@
+{
+  "participants": [
+    {
+      "id": "Participant_Mandant",
+      "process_id": "Process_Mandant",
+      "name": "Mandant",
+      "nodes": [
+        {"id": "Start_M", "type": "StartEvent", "name": "Steuererklärung benötigt"},
+        {"id": "Task_M1", "type": "Task", "name": "Unterlagen zusammenstellen"},
+        {"id": "Task_M2", "type": "SendTask", "name": "Unterlagen übergeben"},
+        {"id": "EBG_M1", "type": "EventBasedGateway", "name": ""},
+        {"id": "ICE_M1", "type": "IntermediateCatchEvent", "name": "Info fehlende Unterlagen", "event_definition": {"type": "message"}},
+        {"id": "Task_M3", "type": "SendTask", "name": "Fehlende Unterlagen nachreichen"},
+        {"id": "ICE_M2", "type": "IntermediateCatchEvent", "name": "Fragen erhalten", "event_definition": {"type": "message"}},
+        {"id": "Task_M4", "type": "SendTask", "name": "Fragen beantworten"},
+        {"id": "ICE_M3", "type": "IntermediateCatchEvent", "name": "Steuerbescheid erhalten", "event_definition": {"type": "message"}},
+        {"id": "End_M", "type": "EndEvent", "name": "Ende"}
+      ],
+      "edges": [
+        {"id": "F_M1", "source": "Start_M", "target": "Task_M1"},
+        {"id": "F_M2", "source": "Task_M1", "target": "Task_M2"},
+        {"id": "F_M3", "source": "Task_M2", "target": "EBG_M1"},
+        {"id": "F_M4", "source": "EBG_M1", "target": "ICE_M1"},
+        {"id": "F_M5", "source": "ICE_M1", "target": "Task_M3"},
+        {"id": "F_M6", "source": "Task_M3", "target": "ICE_M2"},
+        {"id": "F_M7", "source": "EBG_M1", "target": "ICE_M2"},
+        {"id": "F_M8", "source": "ICE_M2", "target": "Task_M4"},
+        {"id": "F_M9", "source": "Task_M4", "target": "ICE_M3"},
+        {"id": "F_M10", "source": "EBG_M1", "target": "ICE_M3"},
+        {"id": "F_M11", "source": "ICE_M3", "target": "End_M"}
+      ]
+    },
+    {
+      "id": "Participant_Kanzlei",
+      "process_id": "Process_Kanzlei",
+      "name": "Steuerkanzlei",
+      "lanes": [
+        {"id": "Lane_Berater", "name": "Steuerberater"},
+        {"id": "Lane_Gehilfe", "name": "Steuergehilfe"}
+      ],
+      "nodes": [
+        {"id": "Start_K", "type": "MessageStartEvent", "name": "Unterlagen erhalten", "lane": "Lane_Berater"},
+        {"id": "Task_K1", "type": "UserTask", "name": "Unterlagen auf Vollständigkeit prüfen", "lane": "Lane_Berater"},
+        {"id": "Gw_K1", "type": "ExclusiveGateway", "name": "Vollständig?", "lane": "Lane_Berater", "default_flow": "F_K3"},
+        {"id": "Task_K2", "type": "SendTask", "name": "Mandant über fehlende Unterlagen informieren", "lane": "Lane_Berater"},
+        {"id": "Task_K2b", "type": "ReceiveTask", "name": "Nachgereichte Unterlagen erhalten", "lane": "Lane_Berater"},
+        {"id": "Task_K3", "type": "UserTask", "name": "In Unterlagen einarbeiten", "lane": "Lane_Gehilfe"},
+        {"id": "Gw_K2", "type": "ExclusiveGateway", "name": "Fragen offen?", "lane": "Lane_Gehilfe", "default_flow": "F_K8"},
+        {"id": "Task_K4", "type": "UserTask", "name": "Fragen an Steuerberater stellen", "lane": "Lane_Gehilfe"},
+        {"id": "Task_K5", "type": "SendTask", "name": "Offene Punkte mit Mandant klären", "lane": "Lane_Berater"},
+        {"id": "Task_K5b", "type": "ReceiveTask", "name": "Antworten vom Mandant erhalten", "lane": "Lane_Berater"},
+        {"id": "Task_K6", "type": "UserTask", "name": "Einkommensteuererklärung erstellen", "lane": "Lane_Gehilfe"},
+        {"id": "Task_K7", "type": "SendTask", "name": "Erklärung an Finanzamt übermitteln", "lane": "Lane_Gehilfe"},
+        {"id": "Task_K8", "type": "ReceiveTask", "name": "Steuerbescheid erhalten", "lane": "Lane_Gehilfe"},
+        {"id": "Task_K9", "type": "UserTask", "name": "Steuerbescheid prüfen", "lane": "Lane_Gehilfe"},
+        {"id": "Task_K10", "type": "SendTask", "name": "Steuerbescheid an Mandant senden", "lane": "Lane_Gehilfe"},
+        {"id": "Task_K11", "type": "Task", "name": "Kopie im Archiv ablegen", "lane": "Lane_Gehilfe"},
+        {"id": "End_K", "type": "EndEvent", "name": "Ende", "lane": "Lane_Gehilfe"}
+      ],
+      "edges": [
+        {"id": "F_K1", "source": "Start_K", "target": "Task_K1"},
+        {"id": "F_K2", "source": "Task_K1", "target": "Gw_K1"},
+        {"id": "F_K2b", "source": "Gw_K1", "target": "Task_K2", "name": "Nein"},
+        {"id": "F_K3", "source": "Gw_K1", "target": "Task_K3", "name": "Ja"},
+        {"id": "F_K4", "source": "Task_K2", "target": "Task_K2b"},
+        {"id": "F_K5", "source": "Task_K2b", "target": "Task_K3"},
+        {"id": "F_K6", "source": "Task_K3", "target": "Gw_K2"},
+        {"id": "F_K7", "source": "Gw_K2", "target": "Task_K4", "name": "Ja"},
+        {"id": "F_K8", "source": "Gw_K2", "target": "Task_K6", "name": "Nein"},
+        {"id": "F_K9", "source": "Task_K4", "target": "Task_K5"},
+        {"id": "F_K10", "source": "Task_K5", "target": "Task_K5b"},
+        {"id": "F_K10b", "source": "Task_K5b", "target": "Task_K6"},
+        {"id": "F_K11", "source": "Task_K6", "target": "Task_K7"},
+        {"id": "F_K12", "source": "Task_K7", "target": "Task_K8"},
+        {"id": "F_K13", "source": "Task_K8", "target": "Task_K9"},
+        {"id": "F_K14", "source": "Task_K9", "target": "Task_K10"},
+        {"id": "F_K15", "source": "Task_K10", "target": "Task_K11"},
+        {"id": "F_K16", "source": "Task_K11", "target": "End_K"}
+      ]
+    },
+    {
+      "id": "Participant_Finanzamt",
+      "process_id": "Process_Finanzamt",
+      "name": "Finanzamt",
+      "nodes": [
+        {"id": "Start_F", "type": "MessageStartEvent", "name": "Steuererklärung erhalten"},
+        {"id": "Task_F1", "type": "UserTask", "name": "Steuererklärung prüfen"},
+        {"id": "Task_F2", "type": "UserTask", "name": "Steuerbescheid erstellen"},
+        {"id": "Task_F3", "type": "SendTask", "name": "Steuerbescheid an Kanzlei senden"},
+        {"id": "End_F", "type": "EndEvent", "name": "Ende"}
+      ],
+      "edges": [
+        {"id": "F_F1", "source": "Start_F", "target": "Task_F1"},
+        {"id": "F_F2", "source": "Task_F1", "target": "Task_F2"},
+        {"id": "F_F3", "source": "Task_F2", "target": "Task_F3"},
+        {"id": "F_F4", "source": "Task_F3", "target": "End_F"}
+      ]
+    }
+  ],
+  "message_flows": [
+    {"id": "Msg_1", "source": "Task_M2", "target": "Start_K", "name": "Unterlagen"},
+    {"id": "Msg_2", "source": "Task_K2", "target": "ICE_M1", "name": "Info fehlende Unterlagen"},
+    {"id": "Msg_3", "source": "Task_M3", "target": "Task_K2b", "name": "Nachgereichte Unterlagen"},
+    {"id": "Msg_4", "source": "Task_K5", "target": "ICE_M2", "name": "Fragen"},
+    {"id": "Msg_5", "source": "Task_M4", "target": "Task_K5b", "name": "Antworten"},
+    {"id": "Msg_6", "source": "Task_K7", "target": "Start_F", "name": "Steuererklärung"},
+    {"id": "Msg_7", "source": "Task_F3", "target": "Task_K8", "name": "Steuerbescheid"},
+    {"id": "Msg_8", "source": "Task_K10", "target": "ICE_M3", "name": "Steuerbescheid"}
+  ]
+}
