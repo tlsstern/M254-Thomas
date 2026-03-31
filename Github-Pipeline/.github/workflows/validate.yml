@@ -1,0 +1,26 @@
+name: BPMN Validierung
+
+on:
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - 'processes/**/*.bpmn'
+
+jobs:
+  validate:
+    name: BPMN XML Validierung
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: BPMN-Dateien validieren
+        run: |
+          chmod +x scripts/validate_bpmn.sh
+          bash scripts/validate_bpmn.sh

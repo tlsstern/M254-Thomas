@@ -1,0 +1,81 @@
+name: BPMN Deployment
+
+on:
+  push:
+    branches: [main, staging]
+    paths:
+      - 'processes/**/*.bpmn'
+
+env:
+  CAMUNDA_CLIENT_ID: ${{ secrets.CAMUNDA_CLIENT_ID }}
+  CAMUNDA_CLIENT_SECRET: ${{ secrets.CAMUNDA_CLIENT_SECRET }}
+  CAMUNDA_CLUSTER_ID: ${{ secrets.CAMUNDA_CLUSTER_ID }}
+  CAMUNDA_REGION: bru-2
+
+jobs:
+  deploy:
+    name: Prozess deployen
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python-Abhängigkeiten installieren
+        run: pip install requests
+
+      - name: Umgebung bestimmen
+        id: env
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "environment=prod" >> "$GITHUB_OUTPUT"
+            echo "process_dir=processes/prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
+            echo "process_dir=processes/dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Geänderte BPMN-Dateien ermitteln
+        id: changes
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD -- '${{ steps.env.outputs.process_dir }}/*.bpmn' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "Keine geänderten BPMN-Dateien gefunden."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Geänderte Dateien:"
+            echo "$CHANGED"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "files<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$CHANGED" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: BPMN-Prozesse deployen
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          IFS=$'\n'
+          for file in ${{ steps.changes.outputs.files }}; do
+            echo "Deploye: $file"
+            python scripts/deploy_process.py \
+              --file "$file" \
+              --client-id "$CAMUNDA_CLIENT_ID" \
+              --client-secret "$CAMUNDA_CLIENT_SECRET" \
+              --cluster-id "$CAMUNDA_CLUSTER_ID" \
+              --region "$CAMUNDA_REGION"
+          done
+
+      - name: Deployment-Zusammenfassung
+        if: always()
+        run: |
+          echo "## Deployment Zusammenfassung" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Umgebung:** ${{ steps.env.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

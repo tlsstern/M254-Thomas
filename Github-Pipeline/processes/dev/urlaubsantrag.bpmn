@@ -1,0 +1,439 @@
+<?xml version="1.0" ?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="python-bpmn-maker" exporterVersion="4.0">
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_Mitarbeiter" name="Mitarbeiter/in" processRef="Process_Mitarbeiter"/>
+    <bpmn:participant id="Participant_Vorgesetzter" name="Vorgesetzte/r" processRef="Process_Vorgesetzter"/>
+    <bpmn:participant id="Participant_HR" name="HR-System" processRef="Process_HR"/>
+    <bpmn:messageFlow id="Msg_AntragSenden" sourceRef="Task_AntragEinreichen" targetRef="Start_VG" name="Urlaubsantrag"/>
+    <bpmn:messageFlow id="Msg_EntscheidAnMA" sourceRef="Task_EntscheidSenden" targetRef="Event_EntscheidErhalten" name="Entscheid"/>
+    <bpmn:messageFlow id="Msg_HR_Notify" sourceRef="Task_HR_Benachrichtigen" targetRef="Start_HR" name="HR-Benachrichtigung"/>
+    <bpmn:messageFlow id="Msg_Bestaetigung" sourceRef="Task_Bestaetigung" targetRef="Event_EntscheidErhalten" name="Bestätigung"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Mitarbeiter" name="Mitarbeiter/in" isExecutable="true">
+    <bpmn:startEvent id="Start_MA" name="Urlaub benötigt">
+      <bpmn:outgoing>F_MA1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_AntragAusfuellen" name="Urlaubsantrag ausfüllen">
+      <bpmn:incoming>F_MA1</bpmn:incoming>
+      <bpmn:incoming>F_MA9</bpmn:incoming>
+      <bpmn:outgoing>F_MA2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="Task_AntragEinreichen" name="Antrag einreichen">
+      <bpmn:incoming>F_MA2</bpmn:incoming>
+      <bpmn:outgoing>F_MA3</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:intermediateCatchEvent id="Event_EntscheidErhalten" name="Entscheid erhalten">
+      <bpmn:messageEventDefinition id="EventDef_4"/>
+      <bpmn:incoming>F_MA3</bpmn:incoming>
+      <bpmn:outgoing>F_MA4</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="Gw_Entscheid_MA" name="Genehmigt?">
+      <bpmn:incoming>F_MA4</bpmn:incoming>
+      <bpmn:outgoing>F_MA5</bpmn:outgoing>
+      <bpmn:outgoing>F_MA6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_UrlaubPlanen" name="Urlaub planen">
+      <bpmn:incoming>F_MA5</bpmn:incoming>
+      <bpmn:outgoing>F_MA7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_AntragAnpassen" name="Antrag anpassen oder verzichten">
+      <bpmn:incoming>F_MA6</bpmn:incoming>
+      <bpmn:outgoing>F_MA8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Anpassen" name="Erneut einreichen?">
+      <bpmn:incoming>F_MA8</bpmn:incoming>
+      <bpmn:outgoing>F_MA9</bpmn:outgoing>
+      <bpmn:outgoing>F_MA10</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_MA_Genehmigt" name="Urlaub genehmigt">
+      <bpmn:incoming>F_MA7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="End_MA_Abgelehnt" name="Antrag zurückgezogen">
+      <bpmn:incoming>F_MA10</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_MA1" sourceRef="Start_MA" targetRef="Task_AntragAusfuellen" name=""/>
+    <bpmn:sequenceFlow id="F_MA2" sourceRef="Task_AntragAusfuellen" targetRef="Task_AntragEinreichen" name=""/>
+    <bpmn:sequenceFlow id="F_MA3" sourceRef="Task_AntragEinreichen" targetRef="Event_EntscheidErhalten" name=""/>
+    <bpmn:sequenceFlow id="F_MA4" sourceRef="Event_EntscheidErhalten" targetRef="Gw_Entscheid_MA" name=""/>
+    <bpmn:sequenceFlow id="F_MA5" sourceRef="Gw_Entscheid_MA" targetRef="Task_UrlaubPlanen" name="Ja"/>
+    <bpmn:sequenceFlow id="F_MA6" sourceRef="Gw_Entscheid_MA" targetRef="Task_AntragAnpassen" name="Nein"/>
+    <bpmn:sequenceFlow id="F_MA7" sourceRef="Task_UrlaubPlanen" targetRef="End_MA_Genehmigt" name=""/>
+    <bpmn:sequenceFlow id="F_MA8" sourceRef="Task_AntragAnpassen" targetRef="Gw_Anpassen" name=""/>
+    <bpmn:sequenceFlow id="F_MA9" sourceRef="Gw_Anpassen" targetRef="Task_AntragAusfuellen" name="Ja"/>
+    <bpmn:sequenceFlow id="F_MA10" sourceRef="Gw_Anpassen" targetRef="End_MA_Abgelehnt" name="Nein"/>
+  </bpmn:process>
+  <bpmn:process id="Process_Vorgesetzter" name="Vorgesetzte/r" isExecutable="true">
+    <bpmn:startEvent id="Start_VG" name="Urlaubsantrag erhalten">
+      <bpmn:messageEventDefinition id="EventDef_5"/>
+      <bpmn:outgoing>F_VG1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_AntragPruefen" name="Antrag prüfen">
+      <bpmn:incoming>F_VG1</bpmn:incoming>
+      <bpmn:outgoing>F_VG2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Genehmigung" name="Genehmigen?">
+      <bpmn:incoming>F_VG2</bpmn:incoming>
+      <bpmn:outgoing>F_VG3</bpmn:outgoing>
+      <bpmn:outgoing>F_VG4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Genehmigen" name="Genehmigung erteilen">
+      <bpmn:incoming>F_VG3</bpmn:incoming>
+      <bpmn:outgoing>F_VG5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Ablehnen" name="Ablehnung mitteilen">
+      <bpmn:incoming>F_VG4</bpmn:incoming>
+      <bpmn:outgoing>F_VG6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Task_EntscheidSenden" name="Entscheid an Mitarbeiter senden">
+      <bpmn:incoming>F_VG5</bpmn:incoming>
+      <bpmn:incoming>F_VG6</bpmn:incoming>
+      <bpmn:outgoing>F_VG7</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sendTask id="Task_HR_Benachrichtigen" name="HR-System benachrichtigen">
+      <bpmn:incoming>F_VG7</bpmn:incoming>
+      <bpmn:outgoing>F_VG8</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="End_VG" name="Bearbeitung abgeschlossen">
+      <bpmn:incoming>F_VG8</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_VG1" sourceRef="Start_VG" targetRef="Task_AntragPruefen" name=""/>
+    <bpmn:sequenceFlow id="F_VG2" sourceRef="Task_AntragPruefen" targetRef="Gw_Genehmigung" name=""/>
+    <bpmn:sequenceFlow id="F_VG3" sourceRef="Gw_Genehmigung" targetRef="Task_Genehmigen" name="Ja"/>
+    <bpmn:sequenceFlow id="F_VG4" sourceRef="Gw_Genehmigung" targetRef="Task_Ablehnen" name="Nein"/>
+    <bpmn:sequenceFlow id="F_VG5" sourceRef="Task_Genehmigen" targetRef="Task_EntscheidSenden" name=""/>
+    <bpmn:sequenceFlow id="F_VG6" sourceRef="Task_Ablehnen" targetRef="Task_EntscheidSenden" name=""/>
+    <bpmn:sequenceFlow id="F_VG7" sourceRef="Task_EntscheidSenden" targetRef="Task_HR_Benachrichtigen" name=""/>
+    <bpmn:sequenceFlow id="F_VG8" sourceRef="Task_HR_Benachrichtigen" targetRef="End_VG" name=""/>
+  </bpmn:process>
+  <bpmn:process id="Process_HR" name="HR-System" isExecutable="true">
+    <bpmn:startEvent id="Start_HR" name="Benachrichtigung erhalten">
+      <bpmn:messageEventDefinition id="EventDef_6"/>
+      <bpmn:outgoing>F_HR1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gw_HR_Entscheid" name="Genehmigt?">
+      <bpmn:incoming>F_HR1</bpmn:incoming>
+      <bpmn:outgoing>F_HR2</bpmn:outgoing>
+      <bpmn:outgoing>F_HR3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_DB_Eintrag" name="Urlaubstage in Datenbank eintragen">
+      <bpmn:incoming>F_HR2</bpmn:incoming>
+      <bpmn:outgoing>F_HR4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Task_Bestaetigung" name="Bestätigung an Mitarbeiter senden">
+      <bpmn:incoming>F_HR4</bpmn:incoming>
+      <bpmn:outgoing>F_HR5</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="Task_Ablehnung_Loggen" name="Ablehnung protokollieren">
+      <bpmn:incoming>F_HR3</bpmn:incoming>
+      <bpmn:outgoing>F_HR6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End_HR" name="HR-Vorgang abgeschlossen">
+      <bpmn:incoming>F_HR5</bpmn:incoming>
+      <bpmn:incoming>F_HR6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_HR1" sourceRef="Start_HR" targetRef="Gw_HR_Entscheid" name=""/>
+    <bpmn:sequenceFlow id="F_HR2" sourceRef="Gw_HR_Entscheid" targetRef="Task_DB_Eintrag" name="Ja"/>
+    <bpmn:sequenceFlow id="F_HR3" sourceRef="Gw_HR_Entscheid" targetRef="Task_Ablehnung_Loggen" name="Nein"/>
+    <bpmn:sequenceFlow id="F_HR4" sourceRef="Task_DB_Eintrag" targetRef="Task_Bestaetigung" name=""/>
+    <bpmn:sequenceFlow id="F_HR5" sourceRef="Task_Bestaetigung" targetRef="End_HR" name=""/>
+    <bpmn:sequenceFlow id="F_HR6" sourceRef="Task_Ablehnung_Loggen" targetRef="End_HR" name=""/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+      <bpmndi:BPMNShape id="Participant_Mitarbeiter_di" bpmnElement="Participant_Mitarbeiter" isHorizontal="true">
+        <dc:Bounds x="120" y="80" width="1840" height="270"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_MA_di" bpmnElement="Start_MA">
+        <dc:Bounds x="432" y="147" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="397" y="187" width="105" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_AntragAusfuellen_di" bpmnElement="Task_AntragAusfuellen">
+        <dc:Bounds x="580" y="125" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_AntragEinreichen_di" bpmnElement="Task_AntragEinreichen">
+        <dc:Bounds x="760" y="125" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_EntscheidErhalten_di" bpmnElement="Event_EntscheidErhalten">
+        <dc:Bounds x="972" y="147" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="927" y="187" width="126" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Entscheid_MA_di" bpmnElement="Gw_Entscheid_MA" isMarkerVisible="true">
+        <dc:Bounds x="1145" y="140" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1135" y="194" width="70" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_UrlaubPlanen_di" bpmnElement="Task_UrlaubPlanen">
+        <dc:Bounds x="1300" y="125" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_AntragAnpassen_di" bpmnElement="Task_AntragAnpassen">
+        <dc:Bounds x="1300" y="235" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Anpassen_di" bpmnElement="Gw_Anpassen" isMarkerVisible="true">
+        <dc:Bounds x="1505" y="140" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1467" y="194" width="126" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_MA_Genehmigt_di" bpmnElement="End_MA_Genehmigt">
+        <dc:Bounds x="1512" y="257" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1474" y="297" width="112" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_MA_Abgelehnt_di" bpmnElement="End_MA_Abgelehnt">
+        <dc:Bounds x="1692" y="147" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1640" y="187" width="140" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F_MA1_di" bpmnElement="F_MA1">
+        <di:waypoint x="468" y="165"/>
+        <di:waypoint x="580" y="165"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA2_di" bpmnElement="F_MA2">
+        <di:waypoint x="680" y="165"/>
+        <di:waypoint x="760" y="165"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA3_di" bpmnElement="F_MA3">
+        <di:waypoint x="860" y="165"/>
+        <di:waypoint x="972" y="165"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA4_di" bpmnElement="F_MA4">
+        <di:waypoint x="1008" y="165"/>
+        <di:waypoint x="1145" y="165"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA5_di" bpmnElement="F_MA5">
+        <di:waypoint x="1195" y="165"/>
+        <di:waypoint x="1300" y="165"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1232" y="143" width="30" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA6_di" bpmnElement="F_MA6">
+        <di:waypoint x="1170" y="190"/>
+        <di:waypoint x="1170" y="275"/>
+        <di:waypoint x="1300" y="275"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1160" y="225" width="30" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA7_di" bpmnElement="F_MA7">
+        <di:waypoint x="1350" y="205"/>
+        <di:waypoint x="1431" y="205"/>
+        <di:waypoint x="1431" y="205"/>
+        <di:waypoint x="1482" y="205"/>
+        <di:waypoint x="1482" y="275"/>
+        <di:waypoint x="1512" y="275"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA8_di" bpmnElement="F_MA8">
+        <di:waypoint x="1350" y="235"/>
+        <di:waypoint x="1427" y="235"/>
+        <di:waypoint x="1427" y="235"/>
+        <di:waypoint x="1475" y="235"/>
+        <di:waypoint x="1475" y="165"/>
+        <di:waypoint x="1505" y="165"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA9_di" bpmnElement="F_MA9">
+        <di:waypoint x="1555" y="165"/>
+        <di:waypoint x="1585" y="165"/>
+        <di:waypoint x="1585" y="75"/>
+        <di:waypoint x="550" y="75"/>
+        <di:waypoint x="550" y="165"/>
+        <di:waypoint x="580" y="165"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1555" y="143" width="30" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_MA10_di" bpmnElement="F_MA10">
+        <di:waypoint x="1555" y="165"/>
+        <di:waypoint x="1692" y="165"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1608" y="143" width="30" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Participant_Vorgesetzter_di" bpmnElement="Participant_Vorgesetzter" isHorizontal="true">
+        <dc:Bounds x="120" y="430" width="1840" height="270"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_VG_di" bpmnElement="Start_VG">
+        <dc:Bounds x="432" y="497" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="373" y="537" width="154" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_AntragPruefen_di" bpmnElement="Task_AntragPruefen">
+        <dc:Bounds x="580" y="475" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Genehmigung_di" bpmnElement="Gw_Genehmigung" isMarkerVisible="true">
+        <dc:Bounds x="785" y="490" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="771" y="544" width="77" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Genehmigen_di" bpmnElement="Task_Genehmigen">
+        <dc:Bounds x="940" y="475" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Ablehnen_di" bpmnElement="Task_Ablehnen">
+        <dc:Bounds x="940" y="585" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_EntscheidSenden_di" bpmnElement="Task_EntscheidSenden">
+        <dc:Bounds x="1120" y="475" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_HR_Benachrichtigen_di" bpmnElement="Task_HR_Benachrichtigen">
+        <dc:Bounds x="1300" y="475" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_VG_di" bpmnElement="End_VG">
+        <dc:Bounds x="1512" y="497" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1442" y="537" width="175" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F_VG1_di" bpmnElement="F_VG1">
+        <di:waypoint x="468" y="515"/>
+        <di:waypoint x="580" y="515"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_VG2_di" bpmnElement="F_VG2">
+        <di:waypoint x="680" y="515"/>
+        <di:waypoint x="785" y="515"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_VG3_di" bpmnElement="F_VG3">
+        <di:waypoint x="835" y="515"/>
+        <di:waypoint x="940" y="515"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="872" y="493" width="30" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_VG4_di" bpmnElement="F_VG4">
+        <di:waypoint x="810" y="540"/>
+        <di:waypoint x="810" y="625"/>
+        <di:waypoint x="940" y="625"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="800" y="575" width="30" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_VG5_di" bpmnElement="F_VG5">
+        <di:waypoint x="1040" y="515"/>
+        <di:waypoint x="1120" y="515"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_VG6_di" bpmnElement="F_VG6">
+        <di:waypoint x="990" y="585"/>
+        <di:waypoint x="1055" y="585"/>
+        <di:waypoint x="1055" y="585"/>
+        <di:waypoint x="1090" y="585"/>
+        <di:waypoint x="1090" y="515"/>
+        <di:waypoint x="1120" y="515"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_VG7_di" bpmnElement="F_VG7">
+        <di:waypoint x="1220" y="515"/>
+        <di:waypoint x="1300" y="515"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_VG8_di" bpmnElement="F_VG8">
+        <di:waypoint x="1400" y="515"/>
+        <di:waypoint x="1512" y="515"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Participant_HR_di" bpmnElement="Participant_HR" isHorizontal="true">
+        <dc:Bounds x="120" y="780" width="1840" height="270"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_HR_di" bpmnElement="Start_HR">
+        <dc:Bounds x="432" y="847" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="362" y="887" width="175" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_HR_Entscheid_di" bpmnElement="Gw_HR_Entscheid" isMarkerVisible="true">
+        <dc:Bounds x="605" y="840" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="595" y="894" width="70" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_DB_Eintrag_di" bpmnElement="Task_DB_Eintrag">
+        <dc:Bounds x="760" y="825" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Bestaetigung_di" bpmnElement="Task_Bestaetigung">
+        <dc:Bounds x="940" y="825" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Ablehnung_Loggen_di" bpmnElement="Task_Ablehnung_Loggen">
+        <dc:Bounds x="760" y="935" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_HR_di" bpmnElement="End_HR">
+        <dc:Bounds x="1152" y="847" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1086" y="887" width="168" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F_HR1_di" bpmnElement="F_HR1">
+        <di:waypoint x="468" y="865"/>
+        <di:waypoint x="605" y="865"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_HR2_di" bpmnElement="F_HR2">
+        <di:waypoint x="655" y="865"/>
+        <di:waypoint x="760" y="865"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="692" y="843" width="30" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_HR3_di" bpmnElement="F_HR3">
+        <di:waypoint x="630" y="890"/>
+        <di:waypoint x="630" y="975"/>
+        <di:waypoint x="760" y="975"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="620" y="925" width="30" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_HR4_di" bpmnElement="F_HR4">
+        <di:waypoint x="860" y="865"/>
+        <di:waypoint x="940" y="865"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_HR5_di" bpmnElement="F_HR5">
+        <di:waypoint x="1040" y="865"/>
+        <di:waypoint x="1152" y="865"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F_HR6_di" bpmnElement="F_HR6">
+        <di:waypoint x="810" y="935"/>
+        <di:waypoint x="981" y="935"/>
+        <di:waypoint x="981" y="935"/>
+        <di:waypoint x="1122" y="935"/>
+        <di:waypoint x="1122" y="865"/>
+        <di:waypoint x="1152" y="865"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_AntragSenden_di" bpmnElement="Msg_AntragSenden">
+        <di:waypoint x="810" y="205"/>
+        <di:waypoint x="810" y="351"/>
+        <di:waypoint x="450" y="351"/>
+        <di:waypoint x="450" y="497"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="584" y="329" width="91" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_EntscheidAnMA_di" bpmnElement="Msg_EntscheidAnMA">
+        <di:waypoint x="1170" y="475"/>
+        <di:waypoint x="1170" y="329"/>
+        <di:waypoint x="990" y="329"/>
+        <di:waypoint x="990" y="183"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1048" y="307" width="63" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_HR_Notify_di" bpmnElement="Msg_HR_Notify">
+        <di:waypoint x="1350" y="555"/>
+        <di:waypoint x="1350" y="701"/>
+        <di:waypoint x="450" y="701"/>
+        <di:waypoint x="450" y="847"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="833" y="679" width="133" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Msg_Bestaetigung_di" bpmnElement="Msg_Bestaetigung">
+        <di:waypoint x="990" y="825"/>
+        <di:waypoint x="990" y="183"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="956" y="497" width="77" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
